@@ -6,12 +6,16 @@ import { MenuBar } from './MenuBar';
 import { WindowFrame } from './WindowFrame';
 import { ContextMenu } from './ContextMenu';
 import { AnimatePresence } from 'framer-motion';
+import { Launchpad } from './Launchpad';
+import { fileSystem } from '../utils/fileSystem';
+import { userConfig } from '../config/userConfig';
+import { FileText, Folder } from 'lucide-react';
 
 export const Desktop: React.FC = () => {
   const { windows, openWindow } = useOSStore();
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [wallpaper, setWallpaper] = useState(() => {
-    return localStorage.getItem('wallpaper') || 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2940&q=80';
+    return localStorage.getItem('wallpaper') || userConfig.system.defaultWallpaper;
   });
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -39,34 +43,62 @@ export const Desktop: React.FC = () => {
       case 'new_folder':
         alert('New Folder created (simulation)');
         break;
-      case 'info':
-        alert('React Web OS v1.0\nCreated by Junrong Huang');
+      case 'settings':
+        alert('Settings not implemented');
         break;
+      case 'info':
+        alert('React Web OS v1.0.0');
+        break;
+    }
+    setContextMenu(null);
+  };
+
+  const handleDesktopItemClick = (name: string, item: any) => {
+    if (item.type === 'folder') {
+      openWindow('finder', 'Finder');
+    } else if (name === userConfig.system.resumeFilename) {
+      openWindow('resume', 'Resume');
+    } else {
+      alert(`Opening ${name}...`);
     }
   };
 
   return (
     <div 
-      className="relative w-screen h-screen overflow-hidden bg-cover bg-center" 
-      style={{ backgroundImage: `url('${wallpaper}')` }}
+      className="h-screen w-screen overflow-hidden bg-cover bg-center relative select-none"
+      style={{ backgroundImage: `url(${wallpaper})` }}
       onContextMenu={handleContextMenu}
       onClick={() => setContextMenu(null)}
     >
+      {/* Overlay Layer */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
+      {/* System Components */}
       <MenuBar />
+      <Launchpad />
       
-      {/* Desktop Icons Grid */}
-      <div className="absolute top-8 left-0 bottom-20 p-4 flex flex-col flex-wrap content-start gap-4 z-0">
-        {Object.values(apps).map((app) => (
+      {/* Desktop Icons Area */}
+      <div className="absolute top-8 right-0 bottom-20 p-4 flex flex-col flex-wrap content-end gap-6 z-0 items-end">
+        {Object.entries(fileSystem.children?.['Desktop']?.children || {}).map(([name, item]) => (
           <button
-            key={app.id}
-            onDoubleClick={() => openWindow(app.id, app.title)}
-            className="w-24 h-28 flex flex-col items-center justify-center gap-2 rounded hover:bg-white/20 transition-colors group text-white text-shadow-sm"
+            key={name}
+            onDoubleClick={() => handleDesktopItemClick(name, item)}
+            className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
           >
-            <div className="text-white drop-shadow-md group-hover:scale-105 transition-transform w-16 h-16 flex items-center justify-center">
-              {app.icon}
-            </div>
+            {item.type === 'folder' ? (
+               <div className="w-16 h-16 text-blue-400 drop-shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">
+                 <Folder size={64} fill="currentColor" />
+               </div>
+            ) : (
+              <div className="w-14 h-16 bg-white rounded-[2px] shadow-sm flex flex-col items-center justify-center relative group-hover:brightness-95 transition-all">
+                 {/* PDF/File Style */}
+                 <div className="absolute top-0 right-0 w-4 h-4 bg-gray-200 rounded-bl-lg" />
+                 <div className="mt-2 text-[8px] font-bold text-red-500 uppercase tracking-wider">PDF</div>
+                 <FileText size={24} className="text-gray-400" />
+              </div>
+            )}
             <span className="text-xs text-center font-medium drop-shadow-md line-clamp-2 leading-tight bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
-              {app.title}
+              {name}
             </span>
           </button>
         ))}

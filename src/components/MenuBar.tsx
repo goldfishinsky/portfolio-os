@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Apple, Wifi, Battery, Search, Command } from 'lucide-react';
+import { Wifi, Battery, Search, Command } from 'lucide-react';
 import { useOSStore } from '../store/osStore';
 import { apps } from '../config/apps';
+
+import { userConfig } from '../config/userConfig';
 
 export const MenuBar: React.FC = () => {
   const { activeWindowId, windows } = useOSStore();
@@ -20,8 +22,8 @@ export const MenuBar: React.FC = () => {
     <div className="h-8 bg-white/20 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 text-white text-sm select-none z-[10000] relative shadow-sm">
       {/* Left Side */}
       <div className="flex items-center gap-4">
-        <button className="hover:bg-white/20 p-1 rounded transition-colors">
-          <Apple size={16} fill="currentColor" />
+        <button className="hover:bg-white/20 px-2 py-1 rounded transition-colors font-bold text-base">
+          {userConfig.profile.initials}
         </button>
         <span className="font-bold">{activeAppName}</span>
         <div className="hidden sm:flex gap-4 text-white/90">

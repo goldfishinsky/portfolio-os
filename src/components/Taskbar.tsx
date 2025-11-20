@@ -8,19 +8,30 @@ interface TaskbarProps {
 }
 
 export const Taskbar: React.FC<TaskbarProps> = ({ apps }) => {
-  const { windows, activeWindowId, focusWindow, minimizeWindow, openWindow } = useOSStore();
-  const mouseX = useMotionValue<number | null>(null);
+  const { windows, openWindow, focusWindow, toggleLaunchpad, isLaunchpadOpen } = useOSStore();
+  const mouseX = useMotionValue(Infinity);
 
-  const handleAppClick = (appId: string) => {
-    const win = windows.find(w => w.appId === appId);
-    if (win) {
-      if (win.id === activeWindowId && !win.isMinimized) {
-        minimizeWindow(win.id);
+  const handleAppClick = (appId: string, title: string, icon: any) => {
+    if (appId === 'launchpad') {
+      toggleLaunchpad();
+      return;
+    }
+    
+    // Close Launchpad if open when clicking another dock item
+    if (isLaunchpadOpen) {
+      toggleLaunchpad(false);
+    }
+
+    const isOpen = windows.find((w) => w.id.startsWith(appId));
+    if (isOpen) {
+      if (isOpen.isMinimized) {
+        focusWindow(isOpen.id);
       } else {
-        focusWindow(win.id);
+        // If already focused, minimize? (Mac behavior is focus, click again doesn't minimize usually)
+        focusWindow(isOpen.id);
       }
     } else {
-      openWindow(appId as any, apps[appId].title);
+      openWindow(appId as any, title, icon);
     }
   };
 
@@ -29,14 +40,14 @@ export const Taskbar: React.FC<TaskbarProps> = ({ apps }) => {
       <div 
         className="flex items-end gap-2 px-4 py-2.5 bg-white/20 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl h-[70px]"
         onMouseMove={(e) => mouseX.set(e.pageX)}
-        onMouseLeave={() => mouseX.set(null)}
+        onMouseLeave={() => mouseX.set(Infinity)}
       >
         {Object.values(apps).map((app) => (
           <DockItem 
             key={app.id} 
             app={app} 
             mouseX={mouseX} 
-            onClick={() => handleAppClick(app.id)}
+            onClick={() => handleAppClick(app.id, app.title, app.icon)}
             isOpen={windows.some(w => w.appId === app.id)}
           />
         ))}

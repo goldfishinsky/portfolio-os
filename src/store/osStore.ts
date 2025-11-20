@@ -14,6 +14,9 @@ interface OSState {
   maximizeWindow: (id: string) => void;
   focusWindow: (id: string) => void;
   toggleStartMenu: (isOpen?: boolean) => void;
+  
+  isLaunchpadOpen: boolean;
+  toggleLaunchpad: (isOpen?: boolean) => void;
 }
 
 export const useOSStore = create<OSState>((set, get) => ({
@@ -85,6 +88,16 @@ export const useOSStore = create<OSState>((set, get) => ({
   toggleStartMenu: (isOpen) => {
     set((state) => ({
       isStartMenuOpen: isOpen !== undefined ? isOpen : !state.isStartMenuOpen,
+    }));
+  },
+
+  // Launchpad Actions
+  isLaunchpadOpen: false,
+  toggleLaunchpad: (isOpen) => {
+    set((state) => ({
+      isLaunchpadOpen: isOpen !== undefined ? isOpen : !state.isLaunchpadOpen,
+      // Close start menu if opening launchpad (though start menu is deprecated)
+      isStartMenuOpen: false, 
     }));
   },
 }));

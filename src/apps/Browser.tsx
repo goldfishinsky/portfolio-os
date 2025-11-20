@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, RotateCw, Lock, Star } from 'lucide-react';
 import { WebResume } from './WebResume';
+import { userConfig } from '../config/userConfig';
 
 export const Browser: React.FC = () => {
-  const [url, setUrl] = useState('https://junrong.dev');
+  const [url, setUrl] = useState(userConfig.social.github);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
@@ -42,7 +43,9 @@ export const Browser: React.FC = () => {
         </div>
 
         <div className="flex gap-2">
-           <div className="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">J</div>
+           <div className="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
+             {userConfig.profile.initials}
+           </div>
         </div>
       </div>
 

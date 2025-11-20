@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { fileSystem } from '../utils/fileSystem';
 import { FileText, ChevronLeft } from 'lucide-react';
+import type { FileSystemItem } from '../types';
 
 export const Blog: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   
   // Helper to get blog posts from FS (assuming structure)
   const blogFolder = fileSystem.children?.['Documents']?.children?.['Blog'];
-  const posts = blogFolder?.children ? Object.values(blogFolder.children) : [];
+  const posts: FileSystemItem[] = blogFolder?.children ? Object.values(blogFolder.children) : [];
 
   if (selectedPost) {
     const post = posts.find(p => p.name === selectedPost);

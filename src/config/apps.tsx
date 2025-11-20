@@ -3,35 +3,34 @@ import { Resume } from '../apps/Resume';
 import { Blog } from '../apps/Blog';
 import { Terminal } from '../apps/Terminal';
 import { Browser } from '../apps/Browser';
-import { Mail } from '../apps/Mail';
+import { Finder } from '../apps/Finder';
 import finderIcon from '../assets/icons/finder.png';
 import launchpadIcon from '../assets/icons/launchpad.png';
 import safariIcon from '../assets/icons/safari.png';
 import terminalIcon from '../assets/icons/terminal.png';
-import vscodeIcon from '../assets/icons/vscode.png';
-import mailIcon from '../assets/icons/mail.png';
 import notesIcon from '../assets/icons/notes.png';
 import calculatorIcon from '../assets/icons/calculator.png';
 import trashIcon from '../assets/icons/trash.png';
+import mailIcon from '../assets/icons/mail.png'; // Keeping icon for Resume if used there, otherwise remove
 
 // Placeholder Components
 const Notepad = () => <div className="h-full w-full p-4"><textarea className="w-full h-full resize-none bg-transparent outline-none font-mono" placeholder="Type here..." /></div>;
 const Calc = () => <div className="h-full w-full flex items-center justify-center bg-gray-100">Calculator Placeholder</div>;
-const Explorer = () => <div className="h-full w-full p-4">File Explorer Placeholder</div>;
-const VSCode = () => <div className="h-full w-full bg-[#1e1e1e] text-white p-4">VS Code Placeholder</div>;
 
 export const apps: Record<string, AppConfig> = {
   finder: {
     id: 'finder',
     title: 'Finder',
     icon: <img src={finderIcon} alt="Finder" className="w-full h-full object-contain drop-shadow-md" />,
-    component: Explorer,
+    component: Finder,
+    width: 900,
+    height: 600,
   },
   launchpad: {
     id: 'launchpad',
     title: 'Launchpad',
     icon: <img src={launchpadIcon} alt="Launchpad" className="w-full h-full object-contain drop-shadow-md" />,
-    component: () => null,
+    component: () => null, // Handled by store/Desktop
   },
   safari: {
     id: 'safari',
@@ -46,22 +45,6 @@ export const apps: Record<string, AppConfig> = {
     title: 'Terminal',
     icon: <img src={terminalIcon} alt="Terminal" className="w-full h-full object-contain drop-shadow-md" />,
     component: Terminal,
-  },
-  vscode: {
-    id: 'vscode',
-    title: 'VS Code',
-    icon: <img src={vscodeIcon} alt="VS Code" className="w-full h-full object-contain drop-shadow-md" />,
-    component: VSCode,
-    width: 900,
-    height: 700,
-  },
-  mail: {
-    id: 'mail',
-    title: 'Mail',
-    icon: <img src={mailIcon} alt="Mail" className="w-full h-full object-contain drop-shadow-md" />,
-    component: Mail,
-    width: 800,
-    height: 600,
   },
   notes: {
     id: 'notes',

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Linkedin, Mail, MapPin, ChevronDown, Code, Server, Database } from 'lucide-react';
 
+import { userConfig } from '../config/userConfig';
+
 export const WebResume: React.FC = () => {
   const [activeSection, setActiveSection] = useState('home');
 
@@ -17,7 +19,7 @@ export const WebResume: React.FC = () => {
     <div className="h-full w-full bg-white overflow-y-auto scroll-smooth font-sans text-gray-900">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-        <div className="font-bold text-xl tracking-tight">JH.</div>
+        <div className="font-bold text-xl tracking-tight">{userConfig.profile.initials}</div>
         <div className="flex gap-6 text-sm font-medium text-gray-600">
           {['Home', 'Experience', 'Skills', 'Contact'].map((item) => (
             <button 
@@ -39,10 +41,10 @@ export const WebResume: React.FC = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-            Junrong Huang
+            {userConfig.profile.name}
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-            Full-stack Software Engineer building scalable web, mobile, and cloud applications.
+            {userConfig.profile.title}
           </p>
           <div className="flex gap-4 justify-center">
             <button onClick={() => scrollTo('contact')} className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-all hover:scale-105">
@@ -164,22 +166,22 @@ export const WebResume: React.FC = () => {
         </p>
         
         <div className="flex flex-wrap justify-center gap-6">
-          <a href="mailto:yipian01@gmail.com" className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-colors shadow-sm">
+          <a href={`mailto:${userConfig.profile.email}`} className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-colors shadow-sm">
             <Mail size={20} />
-            <span>yipian01@gmail.com</span>
+            <span>{userConfig.profile.email}</span>
           </a>
-          <a href="https://linkedin.com/in/junronghuang" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-700 hover:text-blue-700 transition-colors shadow-sm">
+          <a href={userConfig.social.linkedin} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-700 hover:text-blue-700 transition-colors shadow-sm">
             <Linkedin size={20} />
             <span>LinkedIn</span>
           </a>
           <div className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl text-gray-500 cursor-default shadow-sm">
             <MapPin size={20} />
-            <span>Vancouver, BC</span>
+            <span>{userConfig.profile.location}</span>
           </div>
         </div>
 
         <footer className="mt-20 text-sm text-gray-400">
-          © {new Date().getFullYear()} Junrong Huang. All rights reserved.
+          © {new Date().getFullYear()} {userConfig.profile.name}. All rights reserved.
         </footer>
       </section>
     </div>

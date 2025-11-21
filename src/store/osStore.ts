@@ -8,7 +8,7 @@ interface OSState {
   isStartMenuOpen: boolean;
   
   // Actions
-  openWindow: (appId: AppId, title: string, icon?: any) => void;
+  openWindow: (appId: AppId, title: string, icon?: any, props?: any) => void;
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
   maximizeWindow: (id: string) => void;
@@ -17,6 +17,8 @@ interface OSState {
   
   isLaunchpadOpen: boolean;
   toggleLaunchpad: (isOpen?: boolean) => void;
+  moveWindow: (id: string, position: { x: number; y: number }) => void;
+  resizeWindow: (id: string, size: { width: number; height: number }) => void;
 }
 
 export const useOSStore = create<OSState>((set, get) => ({
@@ -25,7 +27,7 @@ export const useOSStore = create<OSState>((set, get) => ({
   zIndexCounter: 100,
   isStartMenuOpen: false,
 
-  openWindow: (appId, title, icon) => {
+  openWindow: (appId, title, icon, props) => {
     const { windows, zIndexCounter } = get();
     // Check if already open (optional, for now allow multiple instances)
     const id = `${appId}-${Date.now()}`;
@@ -34,6 +36,7 @@ export const useOSStore = create<OSState>((set, get) => ({
       appId,
       title,
       icon,
+      props,
       isOpen: true,
       isMinimized: false,
       isMaximized: false,
@@ -98,6 +101,21 @@ export const useOSStore = create<OSState>((set, get) => ({
       isLaunchpadOpen: isOpen !== undefined ? isOpen : !state.isLaunchpadOpen,
       // Close start menu if opening launchpad (though start menu is deprecated)
       isStartMenuOpen: false, 
+    }));
+  },
+  moveWindow: (id, position) => {
+    set((state) => ({
+      windows: state.windows.map((w) =>
+        w.id === id ? { ...w, position } : w
+      ),
+    }));
+  },
+
+  resizeWindow: (id, size) => {
+    set((state) => ({
+      windows: state.windows.map((w) =>
+        w.id === id ? { ...w, size } : w
+      ),
     }));
   },
 }));

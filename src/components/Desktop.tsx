@@ -10,6 +10,7 @@ import { Launchpad } from './Launchpad';
 import { fileSystem } from '../utils/fileSystem';
 import { userConfig } from '../config/userConfig';
 import { FileText, Folder } from 'lucide-react';
+import videoFileIcon from '../assets/icons/video-file.png';
 
 export const Desktop: React.FC = () => {
   const { windows, openWindow } = useOSStore();
@@ -55,7 +56,22 @@ export const Desktop: React.FC = () => {
 
   const handleDesktopItemClick = (name: string, item: any) => {
     if (item.type === 'folder') {
-      openWindow('finder', 'Finder');
+      // For now, just alert or open Finder if we had a way to pass path
+      // Since Finder isn't fully implemented for paths, we'll just open the folder if it's Vlogs by name for now, 
+      // or generic Finder. Ideally Finder should take a path prop.
+      if (name === 'Vlogs') {
+        // We don't have a full file browser yet, so we'll just show the children on desktop? 
+        // Or maybe we can make a simple "Folder View" window?
+        // For this task, the user asked to "put them in a folder and double click to open".
+        // If I open a folder, it should probably open a Finder window showing those files.
+        // But Finder implementation is complex. 
+        // Let's just open Finder for now.
+        openWindow('finder', name); 
+      } else {
+        openWindow('finder', 'Finder');
+      }
+    } else if (item.metadata?.appId) {
+      openWindow(item.metadata.appId, item.name, undefined, item.metadata);
     } else if (name === userConfig.system.resumeFilename) {
       openWindow('resume', 'Resume');
     } else {
@@ -89,6 +105,10 @@ export const Desktop: React.FC = () => {
                <div className="w-16 h-16 text-blue-400 drop-shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">
                  <Folder size={64} fill="currentColor" />
                </div>
+            ) : item.icon === 'video' ? (
+               <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
+                 <img src={videoFileIcon} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-md" />
+               </div>
             ) : (
               <div className="w-14 h-16 bg-white rounded-[2px] shadow-sm flex flex-col items-center justify-center relative group-hover:brightness-95 transition-all">
                  {/* PDF/File Style */}
@@ -114,7 +134,7 @@ export const Desktop: React.FC = () => {
             return (
               <div key={window.id} className="pointer-events-auto">
                 <WindowFrame window={window}>
-                  <AppComp />
+                  <AppComp {...window.props} />
                 </WindowFrame>
               </div>
             );

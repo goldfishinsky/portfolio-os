@@ -17,6 +17,7 @@ import {
 import { fileSystem } from '../utils/fileSystem';
 import type { FileSystemItem } from '../types';
 import { useOSStore } from '../store/osStore';
+import videoFileIcon from '../assets/icons/video-file.png';
 
 const SidebarItem: React.FC<{ 
   icon: React.ReactNode; 
@@ -209,6 +210,8 @@ export const Finder: React.FC = () => {
                   <div className="w-16 h-16 flex items-center justify-center text-blue-500">
                     {item.type === 'folder' ? (
                       <Folder size={60} fill="currentColor" className="text-blue-400" />
+                    ) : item.icon === 'video' ? (
+                      <img src={videoFileIcon} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-sm" />
                     ) : (
                       <FileText size={50} className="text-gray-400" />
                     )}

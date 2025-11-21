@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type AppId = 'notepad' | 'calculator' | 'explorer' | 'terminal' | 'vscode' | 'browser' | 'settings' | 'resume' | 'blog' | 'finder' | 'launchpad' | 'safari' | 'mail' | 'notes' | 'trash' | 'projects';
+export type AppId = 'notepad' | 'calculator' | 'explorer' | 'terminal' | 'vscode' | 'browser' | 'settings' | 'resume' | 'blog' | 'finder' | 'launchpad' | 'safari' | 'mail' | 'notes' | 'trash' | 'projects' | 'video-player';
 
 export interface WindowState {
   id: string;
@@ -13,6 +13,7 @@ export interface WindowState {
   zIndex: number;
   position?: { x: number; y: number };
   size?: { width: number; height: number };
+  props?: any; // Data passed to the app
 }
 
 export interface FileSystemItem {
@@ -21,6 +22,7 @@ export interface FileSystemItem {
   content?: string; // For files
   children?: { [key: string]: FileSystemItem }; // For folders
   icon?: string;
+  metadata?: any; // Extra data like video ID
 }
 
 export interface AppConfig {

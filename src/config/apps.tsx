@@ -7,6 +7,7 @@ import { Launchpad } from '../components/Launchpad';
 import mailIcon from '../assets/icons/mail.png';
 import { Calculator } from '../apps/Calculator';
 import { VideoPlayer } from '../apps/VideoPlayer';
+import { TimeQuadrant } from '../apps/TimeQuadrant';
 import videoPlayerIcon from '../assets/icons/video-player.png';
 import finderMorandiIcon from '../assets/icons/finder-morandi.png';
 
@@ -20,6 +21,7 @@ import {
   SafariIcon, 
   MailIcon, 
   LaunchpadIcon, 
+  TimeQuadrantIcon,
   TrashIcon 
 } from '../components/AppIcons';
 
@@ -101,5 +103,13 @@ export const apps: Record<string, AppConfig> = {
     component: VideoPlayer,
     width: 900,
     height: 600,
+  },
+  'time-quadrant': {
+    id: 'time-quadrant',
+    title: 'Time Quadrant',
+    icon: <TimeQuadrantIcon />,
+    component: TimeQuadrant,
+    width: 1000,
+    height: 700,
   },
 };

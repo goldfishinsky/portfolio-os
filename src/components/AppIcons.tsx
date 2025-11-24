@@ -91,6 +91,17 @@ export const LaunchpadIcon = () => (
   </IconContainer>
 );
 
+export const TimeQuadrantIcon = () => (
+  <IconContainer className="bg-white flex items-center justify-center">
+    <div className="grid grid-cols-2 gap-0.5 p-3 w-full h-full">
+      <div className="bg-red-500 rounded-tl-md" />
+      <div className="bg-blue-500 rounded-tr-md" />
+      <div className="bg-orange-500 rounded-bl-md" />
+      <div className="bg-green-500 rounded-br-md" />
+    </div>
+  </IconContainer>
+);
+
 export const TrashIcon = () => (
   <IconContainer className="bg-gradient-to-b from-[#e0e0e0] to-[#c0c0c0] flex items-center justify-center border border-gray-300">
     <div className="w-[60%] h-[70%] border-2 border-gray-500 rounded-b-md border-t-0 relative flex justify-center">

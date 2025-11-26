@@ -1,22 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from '../components/todo/Sidebar';
 import { Quadrant } from '../components/todo/Quadrant';
-import { AddTodoModal } from '../components/todo/AddTodoModal';
 import { useTodoStore } from '../store/todoStore';
 
 export const TimeQuadrant: React.FC = () => {
   const { fetchTodos, isLoading } = useTodoStore();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [targetQuadrant, setTargetQuadrant] = useState<1 | 2 | 3 | 4>(1);
 
   useEffect(() => {
     fetchTodos();
   }, []);
-
-  const handleAddTodo = (quadrant: 1 | 2 | 3 | 4) => {
-    setTargetQuadrant(quadrant);
-    setIsModalOpen(true);
-  };
 
   if (isLoading) {
     return (
@@ -27,47 +19,41 @@ export const TimeQuadrant: React.FC = () => {
   }
 
   return (
-    <div className="flex h-full w-full bg-[#000000] text-white overflow-hidden font-sans">
+    <div className="flex h-full w-full bg-gradient-to-br from-gray-900 via-[#1c1c1e] to-black text-white overflow-hidden font-sans">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col p-4 gap-4">
-        <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+      <div className="flex-1 flex flex-col p-6 gap-6">
+        <div className="flex-1 grid grid-cols-2 gap-6 min-h-0">
           <Quadrant 
             quadrant={1} 
             title="Urgent & Important" 
             dotColorClass="bg-red-500"
             headerBgClass="bg-red-500/10"
-            onAdd={() => handleAddTodo(1)} 
+            containerBgClass="bg-red-500/5 hover:bg-red-500/10"
           />
           <Quadrant 
             quadrant={2} 
             title="Not Urgent & Important" 
             dotColorClass="bg-blue-500"
             headerBgClass="bg-blue-500/10"
-            onAdd={() => handleAddTodo(2)} 
+            containerBgClass="bg-blue-500/5 hover:bg-blue-500/10"
           />
           <Quadrant 
             quadrant={3} 
             title="Urgent & Not Important" 
             dotColorClass="bg-orange-500"
             headerBgClass="bg-orange-500/10"
-            onAdd={() => handleAddTodo(3)} 
+            containerBgClass="bg-orange-500/5 hover:bg-orange-500/10"
           />
           <Quadrant 
             quadrant={4} 
             title="Not Urgent & Not Important" 
-            dotColorClass="bg-green-500"
-            headerBgClass="bg-green-500/10"
-            onAdd={() => handleAddTodo(4)} 
+            dotColorClass="bg-emerald-500"
+            headerBgClass="bg-emerald-500/10"
+            containerBgClass="bg-emerald-500/5 hover:bg-emerald-500/10"
           />
         </div>
       </div>
-
-      <AddTodoModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        defaultQuadrant={targetQuadrant}
-      />
     </div>
   );
 };

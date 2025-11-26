@@ -111,3 +111,14 @@ export const TrashIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const PreviewIcon = () => (
+  <IconContainer className="bg-white flex items-center justify-center">
+    <div className="relative w-[70%] h-[80%] bg-blue-50 border border-blue-200 shadow-sm flex flex-col items-center justify-center">
+      <div className="text-[8px] font-bold text-blue-500 mb-1">PDF</div>
+      <div className="w-[60%] h-[2px] bg-blue-200 mb-1" />
+      <div className="w-[60%] h-[2px] bg-blue-200 mb-1" />
+      <div className="w-[40%] h-[2px] bg-blue-200" />
+    </div>
+  </IconContainer>
+);

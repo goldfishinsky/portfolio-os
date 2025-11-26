@@ -75,13 +75,13 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ window, children }) =>
           }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className={`flex flex-col w-full h-full bg-window-bg backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 overflow-hidden ${
+          className={`flex flex-col w-full h-full bg-window-bg dark:bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 dark:border-white/10 overflow-hidden transition-colors duration-300 ${
             window.isMaximized ? 'rounded-none' : ''
           }`}
         >
           {/* Title Bar */}
           <div 
-            className="window-title-bar h-9 bg-gray-200/90 backdrop-blur-md border-b border-gray-300/50 flex items-center px-3 select-none cursor-default relative rounded-t-xl"
+            className="window-title-bar h-9 bg-gray-200/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-300/50 dark:border-gray-700/50 flex items-center px-3 select-none cursor-default relative rounded-t-xl transition-colors duration-300"
             onDoubleClick={() => maximizeWindow(window.id)}
           >
             {/* Traffic Lights */}
@@ -115,12 +115,12 @@ export const WindowFrame: React.FC<WindowFrameProps> = ({ window, children }) =>
 
             {/* Title */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="font-bold text-sm text-gray-700/90 tracking-wide drop-shadow-sm">{window.title}</span>
+              <span className="font-bold text-sm text-gray-700/90 dark:text-gray-200/90 tracking-wide drop-shadow-sm transition-colors duration-300">{window.title}</span>
             </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto relative bg-white/80">
+          <div className="flex-1 overflow-auto relative bg-white/80 dark:bg-gray-900/80 transition-colors duration-300">
             {children}
           </div>
 

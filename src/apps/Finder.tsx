@@ -29,7 +29,7 @@ const SidebarItem: React.FC<{
   <div 
     onClick={onClick}
     className={`flex items-center gap-3 px-3 py-1.5 rounded-md cursor-pointer text-sm font-medium transition-colors ${
-      active ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-100'
+      active ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50'
     }`}
   >
     <span className={color}>{icon}</span>
@@ -106,40 +106,40 @@ export const Finder: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-white font-sans text-gray-800">
+    <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-100 transition-colors duration-300">
       {/* Toolbar */}
-      <div className="h-12 bg-[#f6f6f6] border-b border-gray-300 flex items-center px-4 justify-between shrink-0 window-drag-handle">
+      <div className="h-12 bg-[#f6f6f6] dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex items-center px-4 justify-between shrink-0 window-drag-handle transition-colors duration-300">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 text-gray-500">
+          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
             <button 
               onClick={handleBack} 
               disabled={historyIndex === 0}
-              className="p-1 hover:bg-gray-200 rounded disabled:opacity-30"
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30 transition-colors"
             >
               <ChevronLeft size={20} />
             </button>
             <button 
               onClick={handleForward} 
               disabled={historyIndex === history.length - 1}
-              className="p-1 hover:bg-gray-200 rounded disabled:opacity-30"
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30 transition-colors"
             >
               <ChevronRight size={20} />
             </button>
           </div>
-          <span className="font-semibold text-gray-700 ml-2">{currentFolder.name}</span>
+          <span className="font-semibold text-gray-700 dark:text-gray-200 ml-2">{currentFolder.name}</span>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex bg-gray-200 rounded-md p-0.5">
+          <div className="flex bg-gray-200 dark:bg-gray-700 rounded-md p-0.5 transition-colors">
             <button 
               onClick={() => setViewMode('grid')}
-              className={`p-1 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-300'}`}
+              className={`p-1 rounded transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : 'hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300'}`}
             >
               <LayoutGrid size={16} />
             </button>
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-1 rounded ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-300'}`}
+              className={`p-1 rounded transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm' : 'hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300'}`}
             >
               <ListIcon size={16} />
             </button>
@@ -149,7 +149,7 @@ export const Finder: React.FC = () => {
             <input 
               type="text" 
               placeholder="Search" 
-              className="bg-white border border-gray-300 rounded-md pl-8 pr-2 py-1 text-sm w-40 focus:ring-2 focus:ring-blue-400 outline-none"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md pl-8 pr-2 py-1 text-sm w-40 focus:ring-2 focus:ring-blue-400 outline-none transition-colors dark:text-white dark:placeholder-gray-400"
             />
           </div>
         </div>
@@ -157,7 +157,7 @@ export const Finder: React.FC = () => {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-48 bg-[#f6f6f6]/80 backdrop-blur-xl border-r border-gray-200 flex flex-col py-4 px-2 gap-1 shrink-0 text-sm">
+        <div className="w-48 bg-[#f6f6f6]/80 dark:bg-gray-800/80 backdrop-blur-xl border-r border-gray-200 dark:border-gray-700 flex flex-col py-4 px-2 gap-1 shrink-0 text-sm transition-colors duration-300">
           <div className="px-3 text-xs font-semibold text-gray-400 mb-1 mt-2">Favorites</div>
           <SidebarItem icon={<Cloud size={18} />} label="AirDrop" onClick={() => {}} color="text-blue-500" />
           <SidebarItem icon={<Clock size={18} />} label="Recents" onClick={() => {}} color="text-blue-500" />
@@ -195,7 +195,7 @@ export const Finder: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white overflow-y-auto p-4" onClick={() => setSelectedItem(null)}>
+        <div className="flex-1 bg-white dark:bg-gray-900 overflow-y-auto p-4 transition-colors duration-300" onClick={() => setSelectedItem(null)}>
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4">
               {currentFolder.children && Object.values(currentFolder.children).map((item) => (
@@ -204,7 +204,7 @@ export const Finder: React.FC = () => {
                   onClick={(e) => { e.stopPropagation(); handleItemClick(item.name); }}
                   onDoubleClick={(e) => { e.stopPropagation(); handleItemDoubleClick(item); }}
                   className={`flex flex-col items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
-                    selectedItem === item.name ? 'bg-blue-100 ring-1 ring-blue-300' : 'hover:bg-gray-50'
+                    selectedItem === item.name ? 'bg-blue-100 dark:bg-blue-900/50 ring-1 ring-blue-300 dark:ring-blue-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   <div className="w-16 h-16 flex items-center justify-center text-blue-500">
@@ -216,7 +216,7 @@ export const Finder: React.FC = () => {
                       <FileText size={50} className="text-gray-400" />
                     )}
                   </div>
-                  <span className={`text-sm text-center truncate w-full px-1 rounded ${selectedItem === item.name ? 'bg-blue-500 text-white' : 'text-gray-700'}`}>
+                  <span className={`text-sm text-center truncate w-full px-1 rounded ${selectedItem === item.name ? 'bg-blue-500 text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                     {item.name}
                   </span>
                 </div>
@@ -224,7 +224,7 @@ export const Finder: React.FC = () => {
             </div>
           ) : (
             <div className="flex flex-col">
-              <div className="grid grid-cols-[1fr_100px_150px] px-4 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+              <div className="grid grid-cols-[1fr_100px_150px] px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
                 <span>Name</span>
                 <span>Kind</span>
                 <span>Date Modified</span>
@@ -234,9 +234,9 @@ export const Finder: React.FC = () => {
                   key={item.name}
                   onClick={(e) => { e.stopPropagation(); handleItemClick(item.name); }}
                   onDoubleClick={(e) => { e.stopPropagation(); handleItemDoubleClick(item); }}
-                  className={`grid grid-cols-[1fr_100px_150px] px-4 py-2 text-sm cursor-pointer items-center ${
-                    selectedItem === item.name ? 'bg-blue-500 text-white' : 'hover:bg-gray-50 text-gray-700'
-                  } even:bg-gray-50/50`}
+                  className={`grid grid-cols-[1fr_100px_150px] px-4 py-2 text-sm cursor-pointer items-center transition-colors ${
+                    selectedItem === item.name ? 'bg-blue-500 text-white' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  } even:bg-gray-50/50 dark:even:bg-gray-800/30`}
                 >
                   <div className="flex items-center gap-2">
                     {item.type === 'folder' ? (
@@ -256,7 +256,7 @@ export const Finder: React.FC = () => {
       </div>
       
       {/* Status Bar */}
-      <div className="h-6 bg-[#f6f6f6] border-t border-gray-200 flex items-center px-4 text-xs text-gray-500 shrink-0">
+      <div className="h-6 bg-[#f6f6f6] dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center px-4 text-xs text-gray-500 dark:text-gray-400 shrink-0 transition-colors duration-300">
         {currentFolder.children ? Object.keys(currentFolder.children).length : 0} items
       </div>
     </div>

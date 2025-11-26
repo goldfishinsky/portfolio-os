@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-os-bg: #f3f3f3;
   --color-window-bg: rgba(255, 255, 255, 0.85);

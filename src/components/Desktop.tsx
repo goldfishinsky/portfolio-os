@@ -87,7 +87,7 @@ export const Desktop: React.FC = () => {
       onClick={() => setContextMenu(null)}
     >
       {/* Overlay Layer */}
-      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/10 dark:bg-black/40 pointer-events-none transition-colors duration-500" />
 
       {/* System Components */}
       <MenuBar />

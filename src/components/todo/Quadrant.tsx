@@ -8,11 +8,19 @@ interface QuadrantProps {
   title: string;
   dotColorClass: string; // e.g. "bg-red-500"
   headerBgClass: string; // e.g. "bg-red-500/5"
-  onAdd: () => void;
+  containerBgClass: string; // e.g. "bg-red-500/5"
 }
 
-export const Quadrant: React.FC<QuadrantProps> = ({ quadrant, title, dotColorClass, headerBgClass, onAdd }) => {
-  const { todos, filter } = useTodoStore();
+export const Quadrant: React.FC<QuadrantProps> = ({ 
+  quadrant, 
+  title, 
+  dotColorClass, 
+  headerBgClass, 
+  containerBgClass,
+}) => {
+  const { todos, filter, addTodo } = useTodoStore();
+  const [newTaskTitle, setNewTaskTitle] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
 
   const filteredTodos = todos.filter((t) => {
     if (t.quadrant !== quadrant) return false;
@@ -33,27 +41,57 @@ export const Quadrant: React.FC<QuadrantProps> = ({ quadrant, title, dotColorCla
     return true;
   });
 
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && newTaskTitle.trim()) {
+      await addTodo({
+        title: newTaskTitle,
+        quadrant,
+        is_completed: false,
+      });
+      setNewTaskTitle('');
+      setIsAdding(false);
+    } else if (e.key === 'Escape') {
+      setIsAdding(false);
+      setNewTaskTitle('');
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full bg-[#1c1c1e]/50 rounded-xl border border-white/5 overflow-hidden">
-      <div className={`px-4 py-3 border-b border-white/5 flex justify-between items-center ${headerBgClass}`}>
+    <div className={`flex flex-col h-full ${containerBgClass} backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl transition-all hover:border-white/20 ring-1 ring-white/5`}>
+      <div className={`px-4 py-3 border-b border-white/5 flex justify-between items-center ${headerBgClass} backdrop-blur-md`}>
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${dotColorClass}`} />
-          <h3 className="text-sm font-semibold text-gray-200">{title}</h3>
-          <span className="text-xs text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">
+          <div className={`w-2 h-2 rounded-full ${dotColorClass} shadow-[0_0_8px_rgba(255,255,255,0.3)]`} />
+          <h3 className="text-sm font-semibold text-white/90 tracking-wide">{title}</h3>
+          <span className="text-[10px] font-medium text-white/50 bg-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
             {filteredTodos.length}
           </span>
         </div>
         <button 
-          onClick={onAdd}
-          className="p-1 text-gray-500 hover:text-white hover:bg-white/10 rounded transition-colors"
+          onClick={() => setIsAdding(true)}
+          className="p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-95"
         >
           <Plus size={16} />
         </button>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-        {filteredTodos.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-600 text-xs">
+      <div className="flex-1 overflow-y-auto p-3 custom-scrollbar space-y-2">
+        {isAdding && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+            <input
+              autoFocus
+              type="text"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={() => { if (!newTaskTitle.trim()) setIsAdding(false); }}
+              placeholder="Type a new task..."
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:border-white/20 transition-all backdrop-blur-sm"
+            />
+          </div>
+        )}
+
+        {filteredTodos.length === 0 && !isAdding ? (
+          <div className="h-full flex flex-col items-center justify-center text-white/20 text-xs">
             <p>No tasks</p>
           </div>
         ) : (

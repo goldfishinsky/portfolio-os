@@ -23,6 +23,7 @@ interface TodoState {
   toggleTodo: (id: string, is_completed: boolean) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
   updateTodoQuadrant: (id: string, quadrant: 1 | 2 | 3 | 4) => Promise<void>;
+  updateTodo: (id: string, updates: Partial<Omit<Todo, 'id' | 'created_at' | 'user_id'>>) => Promise<void>;
   setFilter: (filter: 'week' | 'month' | 'year' | 'all') => void;
 }
 
@@ -115,6 +116,26 @@ export const useTodoStore = create<TodoState>((set, get) => ({
       const { error } = await supabase
         .from('todos')
         .update({ quadrant })
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err: any) {
+      set({ error: err.message });
+      get().fetchTodos();
+    }
+  },
+
+  updateTodo: async (id, updates) => {
+    try {
+      set((state) => ({
+        todos: state.todos.map((t) =>
+          t.id === id ? { ...t, ...updates } : t
+        ),
+      }));
+
+      const { error } = await supabase
+        .from('todos')
+        .update(updates)
         .eq('id', id);
 
       if (error) throw error;

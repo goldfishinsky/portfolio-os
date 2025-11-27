@@ -9,6 +9,7 @@ import { Calculator } from '../apps/Calculator';
 import { VideoPlayer } from '../apps/VideoPlayer';
 import { TimeQuadrant } from '../apps/TimeQuadrant';
 import { Resume } from '../apps/Resume';
+import { FeedReader } from '../apps/FeedReader';
 import videoPlayerIcon from '../assets/icons/video-player.png';
 import finderMorandiIcon from '../assets/icons/finder-morandi.png';
 
@@ -24,7 +25,8 @@ import {
   LaunchpadIcon, 
   TimeQuadrantIcon,
   TrashIcon,
-  PreviewIcon
+  PreviewIcon,
+  FeedIcon
 } from '../components/AppIcons';
 
 export const apps: Record<string, AppConfig> = {
@@ -121,5 +123,13 @@ export const apps: Record<string, AppConfig> = {
     component: Resume,
     width: 800,
     height: 1000,
+  },
+  feed: {
+    id: 'feed',
+    title: 'Feed',
+    icon: <FeedIcon />,
+    component: FeedReader,
+    width: 1000,
+    height: 700,
   },
 };

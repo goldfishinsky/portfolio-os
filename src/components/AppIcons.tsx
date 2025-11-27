@@ -122,3 +122,15 @@ export const PreviewIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const FeedIcon = () => (
+  <IconContainer className="bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+    <div className="text-white">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </div>
+  </IconContainer>
+);

@@ -134,3 +134,17 @@ export const FeedIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const GuitarIcon = () => (
+  <IconContainer className="bg-gradient-to-br from-[#8B4513] to-[#A0522D] flex items-center justify-center">
+    <div className="text-white/90 drop-shadow-md">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="18" r="4" />
+        <path d="M12 14V2" />
+        <path d="M10 5h4" />
+        <path d="M10 8h4" />
+        <path d="M10 11h4" />
+      </svg>
+    </div>
+  </IconContainer>
+);

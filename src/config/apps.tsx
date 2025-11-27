@@ -10,6 +10,7 @@ import { VideoPlayer } from '../apps/VideoPlayer';
 import { TimeQuadrant } from '../apps/TimeQuadrant';
 import { Resume } from '../apps/Resume';
 import { FeedReader } from '../apps/FeedReader';
+import { Guitar } from '../apps/Guitar';
 import videoPlayerIcon from '../assets/icons/video-player.png';
 import finderMorandiIcon from '../assets/icons/finder-morandi.png';
 
@@ -26,7 +27,8 @@ import {
   TimeQuadrantIcon,
   TrashIcon,
   PreviewIcon,
-  FeedIcon
+  FeedIcon,
+  GuitarIcon
 } from '../components/AppIcons';
 
 export const apps: Record<string, AppConfig> = {
@@ -129,6 +131,14 @@ export const apps: Record<string, AppConfig> = {
     title: 'Feed',
     icon: <FeedIcon />,
     component: FeedReader,
+    width: 1000,
+    height: 700,
+  },
+  guitar: {
+    id: 'guitar',
+    title: 'Guitar',
+    icon: <GuitarIcon />,
+    component: Guitar,
     width: 1000,
     height: 700,
   },

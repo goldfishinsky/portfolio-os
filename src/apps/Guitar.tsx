@@ -13,14 +13,12 @@ type Chord = {
   fingers: number[]; // 0 for open/mute, 1-4 for fingers
 };
 
-type Scale = {
-  name: string;
-  notes: Note[];
-  pattern: string; // Description of the pattern (e.g., "Mi-shape")
-};
-
 const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const STRINGS = ['E', 'B', 'G', 'D', 'A', 'E']; // High E to Low E (indices 0-5)
+
+// Helper to get note index
+const getNoteIndex = (note: string) => NOTES.indexOf(note);
+const getNoteFromIndex = (index: number) => NOTES[index % 12];
 
 // Helper to get note at specific string/fret
 const getNoteAt = (stringIndex: number, fret: number): Note => {
@@ -28,6 +26,22 @@ const getNoteAt = (stringIndex: number, fret: number): Note => {
   const openNote = STRINGS[stringIndex];
   const openNoteIndex = NOTES.indexOf(openNote);
   return NOTES[(openNoteIndex + fret) % 12];
+};
+
+const isNatural = (note: string) => !note.includes('#');
+
+const SCALE_TYPES = {
+  'Major': { intervals: [0, 2, 4, 5, 7, 9, 11] },
+  'Natural Minor': { intervals: [0, 2, 3, 5, 7, 8, 10] },
+  'Major Pentatonic': { intervals: [0, 2, 4, 7, 9] },
+  'Minor Pentatonic': { intervals: [0, 3, 5, 7, 10] },
+  'Blues': { intervals: [0, 3, 5, 6, 7, 10] },
+};
+
+const getScaleNotes = (root: string, type: keyof typeof SCALE_TYPES): Note[] => {
+  const rootIndex = getNoteIndex(root);
+  const intervals = SCALE_TYPES[type].intervals;
+  return intervals.map(i => getNoteFromIndex(rootIndex + i));
 };
 
 // Helper to get all notes in a chord
@@ -38,8 +52,6 @@ const getChordNotes = (chord: Chord): Note[] => {
       notes.add(getNoteAt(stringIndex, fret));
     }
   });
-  // Sort notes starting from root if possible, or just standard order
-  // For simplicity, let's return unique notes
   return Array.from(notes);
 };
 
@@ -89,27 +101,33 @@ const CHORDS: Chord[] = [
   { name: 'B7', key: 'B', suffix: '7', frets: [2, 0, 2, 1, 2, -1], fingers: [4, 0, 3, 1, 2, 0] },
 ];
 
-const SCALES: Scale[] = [
-  { name: 'C Major (Mi Shape)', notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'], pattern: 'Mi Shape (Pattern 1)' },
-  { name: 'A Minor Pentatonic (La Shape)', notes: ['A', 'C', 'D', 'E', 'G'], pattern: 'La Shape (Pattern 1)' },
-  { name: 'G Major (Sol Shape)', notes: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'], pattern: 'Sol Shape' },
-];
+// Scales removed in favor of dynamic generation
 
 // --- Components ---
 
-const Fretboard = ({ showNotes = true, highlightNotes = [] as string[] }) => {
-  const frets = 12;
+const Fretboard = ({ 
+  showNotes = true, 
+  highlightNotes = [] as string[], 
+  fretRange,
+  onlyNatural = false 
+}: { 
+  showNotes?: boolean, 
+  highlightNotes?: string[], 
+  fretRange?: [number, number],
+  onlyNatural?: boolean
+}) => {
+  const frets = 15;
 
   return (
-    <div className="w-full overflow-x-auto p-4 bg-[#2c2c2c] rounded-lg shadow-inner border border-gray-700">
-      <div className="relative min-w-[800px] select-none">
+    <div className="w-full overflow-x-auto pt-8 pb-4 px-4 bg-[#2c2c2c] rounded-lg shadow-inner border border-gray-700">
+      <div className="relative min-w-[1000px] select-none">
         {/* Frets */}
         <div className="flex border-b-4 border-gray-400">
            <div className="w-12 border-r-4 border-gray-500 bg-[#3a3a3a] flex items-center justify-center text-gray-400 text-xs font-bold">Nut</div>
            {[...Array(frets)].map((_, i) => (
              <div key={i} className="flex-1 h-8 border-r-2 border-gray-500 flex items-center justify-center relative">
                 <span className="absolute -top-6 text-gray-500 text-xs">{i + 1}</span>
-                {[3, 5, 7, 9].includes(i + 1) && <div className="w-3 h-3 rounded-full bg-gray-600/50" />}
+                {[3, 5, 7, 9, 15].includes(i + 1) && <div className="w-3 h-3 rounded-full bg-gray-600/50" />}
                 {[12].includes(i + 1) && (
                   <div className="flex gap-1">
                     <div className="w-3 h-3 rounded-full bg-gray-600/50" />
@@ -124,29 +142,43 @@ const Fretboard = ({ showNotes = true, highlightNotes = [] as string[] }) => {
         <div className="relative">
           {STRINGS.map((string, stringIndex) => (
             <div key={stringIndex} className="flex h-10 items-center relative">
-              {/* String Line */}
+              {/* String Line - Fixed thickness (Low E thick, High E thin) */}
               <div 
                 className="absolute left-0 right-0 bg-[#e0c090] shadow-sm z-0" 
-                style={{ height: `${Math.max(1, 4 - stringIndex * 0.5)}px`, top: '50%', transform: 'translateY(-50%)' }} 
+                style={{ height: `${Math.max(1, 1 + stringIndex * 0.6)}px`, top: '50%', transform: 'translateY(-50%)' }} 
               />
               
               {/* Nut Note */}
               <div className="w-12 flex-shrink-0 z-10 flex items-center justify-center bg-[#2c2c2c] h-full border-r-4 border-gray-500">
-                 <span className={`text-sm font-bold ${highlightNotes.includes(string) ? 'text-yellow-400' : 'text-gray-400'}`}>{string}</span>
+                 <span className={`text-sm font-bold ${highlightNotes.includes(string) && (!fretRange || (0 >= fretRange[0] && 0 <= fretRange[1])) ? 'text-yellow-400' : 'text-gray-400'}`}>{string}</span>
               </div>
 
               {/* Fret Notes */}
               {[...Array(frets)].map((_, fretIndex) => {
-                const note = getNoteAt(stringIndex, fretIndex + 1);
-                const isHighlighted = highlightNotes.includes(note);
+                const fretNum = fretIndex + 1;
+                const note = getNoteAt(stringIndex, fretNum);
+                
+                const inRange = !fretRange || (fretNum >= fretRange[0] && fretNum <= fretRange[1]);
+                const isHighlighted = highlightNotes.includes(note) && inRange;
+                const isNaturalNote = isNatural(note);
+                
+                // Show note if:
+                // 1. It is highlighted (part of scale)
+                // 2. OR showNotes is true AND (onlyNatural is false OR note is natural)
+                const shouldShow = isHighlighted || (showNotes && (!onlyNatural || isNaturalNote));
+                
+                const isDimmed = fretRange && !inRange;
+
                 return (
-                  <div key={fretIndex} className="flex-1 flex items-center justify-center z-10 border-r-2 border-gray-500/30 h-full">
-                    {(showNotes || isHighlighted) && (
+                  <div key={fretIndex} className={`flex-1 flex items-center justify-center z-10 border-r-2 border-gray-500/30 h-full ${isDimmed ? 'bg-black/20' : ''}`}>
+                    {shouldShow && (
                       <div className={`
                         w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-all
-                        ${isHighlighted 
+                        ${isHighlighted || (onlyNatural && isNaturalNote)
                           ? 'bg-yellow-500 text-black scale-110 ring-2 ring-yellow-200' 
                           : 'bg-gray-700 text-gray-300 opacity-60 hover:opacity-100'}
+                        ${isDimmed ? 'opacity-20' : ''}
+                        ${!isHighlighted && onlyNatural && !isNaturalNote ? 'opacity-0' : ''}
                       `}>
                         {note}
                       </div>
@@ -313,9 +345,12 @@ const ChordCard = ({ chord }: { chord: Chord }) => {
 
 export const Guitar = () => {
   const [activeTab, setActiveTab] = useState<'chords' | 'scales' | 'fretboard'>('chords');
-  const [selectedScale, setSelectedScale] = useState<Scale>(SCALES[0]);
   
-  // Filters
+  // Scale State
+  const [root, setRoot] = useState('C');
+  const [scaleType, setScaleType] = useState<keyof typeof SCALE_TYPES>('Major');
+  
+  // Chord Filters
   const [selectedKey, setSelectedKey] = useState<string>('All');
   const [selectedSuffix, setSelectedSuffix] = useState<string>('All');
 
@@ -329,6 +364,8 @@ export const Guitar = () => {
         return keyMatch && suffixMatch;
     });
   }, [selectedKey, selectedSuffix]);
+
+  const currentScaleNotes = useMemo(() => getScaleNotes(root, scaleType), [root, scaleType]);
 
   return (
     <div className="h-full w-full bg-gray-50 dark:bg-[#121212] flex flex-col text-gray-900 dark:text-gray-100">
@@ -417,24 +454,40 @@ export const Guitar = () => {
 
         {activeTab === 'scales' && (
             <div className="space-y-6 h-full flex flex-col">
-                 <div className="flex items-center justify-between">
+                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h2 className="text-2xl font-bold">Scale Patterns</h2>
-                    <select 
-                        value={selectedScale.name}
-                        onChange={(e) => setSelectedScale(SCALES.find(s => s.name === e.target.value) || SCALES[0])}
-                        className="bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-orange-500"
-                    >
-                        {SCALES.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                    </select>
+                    
+                    <div className="flex gap-3">
+                        <div className="flex items-center gap-2 bg-white dark:bg-[#1a1a1a] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <span className="text-sm font-medium text-gray-500">Key:</span>
+                            <select 
+                                value={root}
+                                onChange={(e) => setRoot(e.target.value)}
+                                className="bg-transparent outline-none text-sm font-bold min-w-[40px]"
+                            >
+                                {NOTES.map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white dark:bg-[#1a1a1a] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <span className="text-sm font-medium text-gray-500">Type:</span>
+                            <select 
+                                value={scaleType}
+                                onChange={(e) => setScaleType(e.target.value as any)}
+                                className="bg-transparent outline-none text-sm font-bold min-w-[100px]"
+                            >
+                                {Object.keys(SCALE_TYPES).map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
                 <div className="bg-white dark:bg-[#1a1a1a] p-6 rounded-xl border border-gray-200 dark:border-gray-800 flex-1 flex flex-col gap-6">
                     <div>
-                        <h3 className="text-lg font-bold text-orange-500">{selectedScale.name}</h3>
-                        <p className="text-gray-500">{selectedScale.pattern} • Notes: {selectedScale.notes.join(', ')}</p>
+                        <h3 className="text-lg font-bold text-orange-500">{root} {scaleType}</h3>
+                        <p className="text-gray-500">Notes: {currentScaleNotes.join(', ')}</p>
                     </div>
                     <div className="flex-1 flex items-center justify-center">
-                        <Fretboard showNotes={true} highlightNotes={selectedScale.notes} />
+                        <Fretboard showNotes={true} highlightNotes={currentScaleNotes} onlyNatural={false} />
                     </div>
                 </div>
             </div>
@@ -444,10 +497,10 @@ export const Guitar = () => {
             <div className="space-y-6 h-full flex flex-col">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">Full Fretboard</h2>
-                    <span className="text-sm text-gray-500">Reference for all notes</span>
+                    <span className="text-sm text-gray-500">Showing Natural Notes Only</span>
                 </div>
                 <div className="bg-white dark:bg-[#1a1a1a] p-6 rounded-xl border border-gray-200 dark:border-gray-800 flex-1 flex items-center justify-center">
-                    <Fretboard showNotes={true} />
+                    <Fretboard showNotes={true} onlyNatural={true} />
                 </div>
             </div>
         )}

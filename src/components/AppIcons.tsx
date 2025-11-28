@@ -136,14 +136,70 @@ export const FeedIcon = () => (
 );
 
 export const GuitarIcon = () => (
-  <IconContainer className="bg-gradient-to-br from-[#8B4513] to-[#A0522D] flex items-center justify-center">
-    <div className="text-white/90 drop-shadow-md">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="18" r="4" />
-        <path d="M12 14V2" />
-        <path d="M10 5h4" />
-        <path d="M10 8h4" />
-        <path d="M10 11h4" />
+  <IconContainer className="bg-gradient-to-br from-[#2c3e50] to-[#000000] flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center p-1.5">
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg" style={{ transform: 'rotate(-45deg)' }}>
+        {/* Strap Buttons */}
+        <circle cx="35" cy="85" r="1.5" fill="#bdc3c7" />
+        <circle cx="25" cy="45" r="1.5" fill="#bdc3c7" />
+
+        {/* Body (Strat-like shape) */}
+        <path 
+          d="M35 85 C 25 85, 20 75, 25 60 C 28 55, 32 50, 32 50 C 32 50, 28 45, 28 40 C 28 30, 35 25, 45 25 C 55 25, 60 35, 60 45 C 60 45, 65 50, 65 60 C 65 75, 50 85, 35 85 Z" 
+          fill="#e74c3c" 
+          stroke="#c0392b" 
+          strokeWidth="1"
+        />
+        
+        {/* Pickguard */}
+        <path 
+          d="M38 75 C 33 75, 30 70, 32 60 C 33 58, 35 57, 35 57 C 35 57, 33 53, 33 50 C 33 45, 37 40, 42 40 C 47 40, 49 45, 49 50 L 49 65 C 49 68, 42 75, 38 75 Z" 
+          fill="#ecf0f1" 
+          opacity="0.9"
+        />
+
+        {/* Neck */}
+        <rect x="42" y="5" width="6" height="45" fill="#f1c40f" /> {/* Maple Neck */}
+        <rect x="42.5" y="5" width="5" height="45" fill="#3e2723" /> {/* Rosewood Fretboard */}
+        
+        {/* Frets */}
+        {[...Array(10)].map((_, i) => (
+            <line key={i} x1="42.5" y1={10 + i * 3.5} x2="47.5" y2={10 + i * 3.5} stroke="#bdc3c7" strokeWidth="0.5" />
+        ))}
+
+        {/* Headstock */}
+        <path d="M42 5 L 40 0 C 40 0, 46 -5, 52 0 L 48 5 Z" fill="#f1c40f" />
+        
+        {/* Tuning Pegs */}
+        <circle cx="41" cy="1" r="1" fill="#bdc3c7" />
+        <circle cx="41" cy="3" r="1" fill="#bdc3c7" />
+        <circle cx="42" cy="0" r="1" fill="#bdc3c7" />
+        <circle cx="44" cy="-1" r="1" fill="#bdc3c7" />
+        <circle cx="46" cy="-1" r="1" fill="#bdc3c7" />
+        <circle cx="48" cy="0" r="1" fill="#bdc3c7" />
+
+        {/* Bridge */}
+        <rect x="40" y="72" width="10" height="3" fill="#bdc3c7" />
+        
+        {/* Pickups */}
+        <rect x="43" y="55" width="4" height="2" rx="0.5" fill="#34495e" transform="rotate(-10 45 56)" />
+        <rect x="42.5" y="60" width="5" height="2" rx="0.5" fill="#34495e" transform="rotate(-10 45 61)" />
+        <rect x="42" y="65" width="6" height="2" rx="0.5" fill="#34495e" transform="rotate(-10 45 66)" />
+
+        {/* Strings */}
+        <line x1="43" y1="0" x2="43" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        <line x1="43.8" y1="0" x2="43.8" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        <line x1="44.6" y1="0" x2="44.6" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        <line x1="45.4" y1="0" x2="45.4" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        <line x1="46.2" y1="0" x2="46.2" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        <line x1="47" y1="0" x2="47" y2="72" stroke="#bdc3c7" strokeWidth="0.2" />
+        
+        {/* Output Jack */}
+        <ellipse cx="55" cy="75" rx="1.5" ry="2.5" fill="#bdc3c7" transform="rotate(45 55 75)" />
+        
+        {/* Knobs */}
+        <circle cx="52" cy="68" r="1.5" fill="#ecf0f1" stroke="#bdc3c7" strokeWidth="0.5" />
+        <circle cx="56" cy="70" r="1.5" fill="#ecf0f1" stroke="#bdc3c7" strokeWidth="0.5" />
       </svg>
     </div>
   </IconContainer>

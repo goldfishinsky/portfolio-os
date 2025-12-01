@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Music, Grid, List, Filter } from 'lucide-react';
+import { Music, Grid, List, Filter, Keyboard } from 'lucide-react';
+import { Piano } from '../components/music/Piano';
 
 // --- Data Structures ---
 
@@ -344,7 +345,7 @@ const ChordCard = ({ chord }: { chord: Chord }) => {
 };
 
 export const Guitar = () => {
-  const [activeTab, setActiveTab] = useState<'chords' | 'scales' | 'fretboard'>('chords');
+  const [activeTab, setActiveTab] = useState<'chords' | 'scales' | 'fretboard' | 'keyboard'>('chords');
   
   // Scale State
   const [root, setRoot] = useState('C');
@@ -382,6 +383,7 @@ export const Guitar = () => {
                 { id: 'chords', label: 'Chords', icon: Grid },
                 { id: 'scales', label: 'Scales', icon: List },
                 { id: 'fretboard', label: 'Fretboard', icon: Music },
+                { id: 'keyboard', label: 'Keyboard', icon: Keyboard },
             ].map((tab) => (
                 <button
                     key={tab.id}
@@ -502,6 +504,13 @@ export const Guitar = () => {
                 <div className="bg-white dark:bg-[#1a1a1a] p-6 rounded-xl border border-gray-200 dark:border-gray-800 flex-1 flex items-center justify-center">
                     <Fretboard showNotes={true} onlyNatural={true} />
                 </div>
+            </div>
+        )}
+
+        {activeTab === 'keyboard' && (
+            <div className="h-full flex flex-col items-center justify-center bg-[#121212]">
+                <Piano />
+                <p className="mt-8 text-gray-500 text-sm">Use your computer keyboard to play (A-K, W-U)</p>
             </div>
         )}
       </div>

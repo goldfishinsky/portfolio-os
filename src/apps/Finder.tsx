@@ -211,7 +211,7 @@ export const Finder: React.FC = () => {
                     {item.type === 'folder' ? (
                       <Folder size={60} fill="currentColor" className="text-blue-400" />
                     ) : item.icon === 'video' ? (
-                      <img src={videoFileIcon} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-sm" />
+                      <img src={videoFileIcon.src} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-sm" />
                     ) : (
                       <FileText size={50} className="text-gray-400" />
                     )}

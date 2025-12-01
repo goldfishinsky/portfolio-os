@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { useOSStore } from '../store/osStore';
 import { apps } from '../config/apps';
@@ -107,7 +109,7 @@ export const Desktop: React.FC = () => {
                </div>
             ) : item.icon === 'video' ? (
                <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
-                 <img src={videoFileIcon} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-md" />
+                 <img src={videoFileIcon.src} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-md" />
                </div>
             ) : (
               <div className="w-14 h-16 bg-white rounded-[2px] shadow-sm flex flex-col items-center justify-center relative group-hover:brightness-95 transition-all">

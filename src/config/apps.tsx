@@ -36,7 +36,7 @@ export const apps: Record<string, AppConfig> = {
   finder: {
     id: 'finder',
     title: 'Finder',
-    icon: <img src={finderMorandiIcon} alt="Finder" className="w-full h-full object-cover rounded-[22%] drop-shadow-md" />,
+    icon: <img src={finderMorandiIcon.src} alt="Finder" className="w-full h-full object-cover rounded-[22%] drop-shadow-md" />,
     component: Finder,
     width: 800,
     height: 600,
@@ -58,7 +58,7 @@ export const apps: Record<string, AppConfig> = {
   mail: {
     id: 'mail',
     title: 'Mail',
-    icon: <MailIcon originalIcon={mailIcon} />,
+    icon: <MailIcon originalIcon={mailIcon.src} />,
     component: Notepad, // Placeholder
     width: 800,
     height: 600,
@@ -106,7 +106,7 @@ export const apps: Record<string, AppConfig> = {
   'video-player': {
     id: 'video-player',
     title: 'Videos',
-    icon: <img src={videoPlayerIcon} alt="Videos" className="w-full h-full object-cover rounded-[22%] drop-shadow-md" />,
+    icon: <img src={videoPlayerIcon.src} alt="Videos" className="w-full h-full object-cover rounded-[22%] drop-shadow-md" />,
     component: VideoPlayer,
     width: 900,
     height: 600,

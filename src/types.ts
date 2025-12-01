@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type AppId = 'notepad' | 'calculator' | 'explorer' | 'terminal' | 'vscode' | 'browser' | 'settings' | 'resume' | 'blog' | 'finder' | 'launchpad' | 'safari' | 'mail' | 'notes' | 'trash' | 'projects' | 'video-player' | 'time-quadrant' | 'feed' | 'guitar' | 'driving-test';
+export type AppId = 'notepad' | 'calculator' | 'explorer' | 'terminal' | 'vscode' | 'browser' | 'settings' | 'resume' | 'blog' | 'finder' | 'launchpad' | 'safari' | 'mail' | 'notes' | 'trash' | 'projects' | 'video-player' | 'time-quadrant' | 'feed' | 'guitar' | 'driving-test' | 'fluent-card';
 
 export interface WindowState {
   id: string;

@@ -12,6 +12,7 @@ import { Resume } from '../apps/Resume';
 import { FeedReader } from '../apps/FeedReader';
 import { Guitar } from '../apps/Guitar';
 import { DrivingTest } from '../apps/DrivingTest';
+import { FluentCardApp } from '../apps/fluent-card/FluentCardApp';
 import videoPlayerIcon from '../assets/icons/video-player.png';
 import finderMorandiIcon from '../assets/icons/finder-morandi.png';
 
@@ -150,5 +151,13 @@ export const apps: Record<string, AppConfig> = {
     component: DrivingTest,
     width: 1000,
     height: 700,
+  },
+  'fluent-card': {
+    id: 'fluent-card',
+    title: 'FluentCard',
+    icon: <div className="w-full h-full bg-green-500 rounded-xl flex items-center justify-center text-white font-bold text-xs">FC</div>,
+    component: FluentCardApp,
+    width: 400,
+    height: 800, // Phone-like aspect ratio
   },
 };

@@ -18,6 +18,7 @@ import { ChristmasScene } from './ChristmasScene';
 export const Desktop: React.FC = () => {
   const { windows, openWindow } = useOSStore();
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [showChristmasControls, setShowChristmasControls] = useState(false);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,7 +78,7 @@ export const Desktop: React.FC = () => {
       onClick={() => setContextMenu(null)}
     >
       {/* 3D Wallpaper Layer */}
-      <ChristmasScene />
+      <ChristmasScene showControls={showChristmasControls} />
 
       {/* Overlay Layer */}
       <div className="absolute inset-0 bg-black/10 dark:bg-black/20 pointer-events-none transition-colors duration-500 z-0" />
@@ -95,6 +96,19 @@ export const Desktop: React.FC = () => {
 
         {/* Desktop Icons Area */}
         <div className="absolute top-8 right-0 bottom-20 p-4 flex flex-col flex-wrap content-end gap-6 z-0 items-end pointer-events-auto">
+          {/* Christmas Control App */}
+          <button
+            onClick={() => setShowChristmasControls(!showChristmasControls)}
+            className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
+          >
+            <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <img src="/minion-icon.png" alt="Xmas Control" className="w-14 h-14 object-cover rounded-xl drop-shadow-md" />
+            </div>
+            <span className="text-xs text-center font-medium drop-shadow-md line-clamp-2 leading-tight bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
+              Xmas Control
+            </span>
+          </button>
+
           {Object.entries(fileSystem.children?.['Desktop']?.children || {}).map(([name, item]) => (
             <button
               key={name}
@@ -143,7 +157,7 @@ export const Desktop: React.FC = () => {
         </div>
 
         {/* Dock (formerly Taskbar) */}
-        <div className="pointer-events-auto relative z-30">
+        <div className="absolute inset-0 z-30 pointer-events-none">
           <Taskbar apps={apps} />
         </div>
 

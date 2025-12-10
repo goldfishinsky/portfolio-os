@@ -36,9 +36,9 @@ export const Taskbar: React.FC<TaskbarProps> = ({ apps }) => {
   };
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[9999]">
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto">
       <div 
-        className="flex items-end gap-3 px-4 py-3 bg-white/10 backdrop-blur-3xl border border-white/20 rounded-2xl shadow-2xl h-[80px]"
+        className="flex items-end gap-3 px-4 py-3 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl h-[80px]"
         onMouseMove={(e) => mouseX.set(e.pageX)}
         onMouseLeave={() => mouseX.set(Infinity)}
       >

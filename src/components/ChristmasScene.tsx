@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import React, { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows } from '@react-three/drei';
+import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -11,117 +11,50 @@ const randomRange = (min: number, max: number) => Math.random() * (max - min) + 
 
 // --- Components ---
 
-// Helper to merge geometries (simple version for this specific use case)
-const mergeGeometries = (geometries: THREE.BufferGeometry[]) => {
-    const mergedGeometry = new THREE.BufferGeometry();
-    
-    const positions: number[] = [];
-    const normals: number[] = [];
-    const indices: number[] = [];
-    
-    let offset = 0;
-    
-    geometries.forEach(geom => {
-        const pos = geom.attributes.position.array;
-        const norm = geom.attributes.normal.array;
-        const ind = geom.index?.array;
-        
-        if (pos) {
-            for (let i = 0; i < pos.length; i++) positions.push(pos[i]);
-        }
-        if (norm) {
-            for (let i = 0; i < norm.length; i++) normals.push(norm[i]);
-        }
-        if (ind) {
-            for (let i = 0; i < ind.length; i++) indices.push(ind[i] + offset);
-        }
-        
-        offset += (pos.length / 3);
-    });
-    
-    mergedGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    mergedGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-    if (indices.length > 0) mergedGeometry.setIndex(indices);
-    
-    return mergedGeometry;
-};
-
 const RealisticFoliage = () => {
-  // Increased count for denser, more realistic look
-  const count = 2500;
+  // Optimized count for background wallpaper performance
+  const count = 600;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  // Generate custom "Pine Tuft" geometry
-  const pineTuftGeometry = useMemo(() => {
-    const geometries: THREE.BufferGeometry[] = [];
-    const needleCount = 6;
-    
-    for (let i = 0; i < needleCount; i++) {
-        // Thin cylinder for a needle
-        const geo = new THREE.CylinderGeometry(0.02, 0.04, 1.2, 4);
-        
-        // Rotate and position to form a tuft
-        const angle = (i / needleCount) * Math.PI * 2 + Math.random() * 0.5;
-        const lean = Math.PI / 4 + Math.random() * 0.2; // Lean outwards
-        
-        geo.rotateX(lean);
-        geo.rotateY(angle);
-        geo.translate(0, 0, 0); // Center at origin
-        
-        geometries.push(geo);
-    }
-    
-    return mergeGeometries(geometries);
-  }, []);
 
   useLayoutEffect(() => {
     if (!meshRef.current) return;
     
+    // Tree shape parameters
     const treeHeight = 7;
     const maxRadius = 2.5;
 
     for (let i = 0; i < count; i++) {
-      // Layered distribution for pine tree look
-      const layer = Math.floor(Math.random() * 8); // 8 layers of branches
-      const layerHeight = treeHeight / 8;
-      
-      // Position within layer
-      const h = (layer + Math.random()) / 8;
+      // Normalized height (0 at bottom, 1 at top)
+      const h = Math.random(); 
       const y = h * treeHeight;
       
       // Cone shape radius at this height
-      const rBase = (1 - h) * maxRadius;
-      // Push branches out to surface more
-      const r = rBase * (0.4 + Math.random() * 0.6); 
+      const r = (1 - h) * maxRadius;
       
+      // Random position within the cone volume (concentrated on surface)
       const angle = Math.random() * Math.PI * 2;
-      const x = Math.cos(angle) * r;
-      const z = Math.sin(angle) * r;
+      const radius = r * Math.sqrt(Math.random()); // Sqrt for uniform distribution
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
 
       dummy.position.set(x, y, z);
       
-      // Point outwards and slightly up
-      dummy.lookAt(0, y + 2, 0); 
-      // Random rotation for natural look
-      dummy.rotateX(Math.PI / 2 + randomRange(-0.3, 0.3));
+      // Rotate to point outwards/upwards
+      dummy.lookAt(0, y + 1, 0); 
+      dummy.rotateX(Math.PI / 2 + randomRange(-0.2, 0.2));
       dummy.rotateY(randomRange(0, Math.PI * 2));
-      dummy.rotateZ(randomRange(-0.3, 0.3));
+      dummy.rotateZ(randomRange(-0.2, 0.2));
 
-      // Thinner, longer branches/needles
-      const scale = randomRange(0.2, 0.5);
-      dummy.scale.set(scale * 0.5, scale * 1.5, scale * 0.5);
+      // Random scale for variety
+      const scale = randomRange(0.15, 0.35);
+      dummy.scale.set(scale, scale, scale);
 
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
       
-      // Varied green hues: darker inside, lighter tips
-      const isTip = r > rBase * 0.8;
-      const hue = randomRange(0.28, 0.38); // Green range
-      const sat = isTip ? randomRange(0.6, 0.8) : randomRange(0.3, 0.5);
-      const light = isTip ? randomRange(0.3, 0.5) : randomRange(0.1, 0.2);
-      
-      const color = new THREE.Color().setHSL(hue, sat, light);
+      // Vary color slightly for realism
+      const color = new THREE.Color().setHSL(randomRange(0.25, 0.35), randomRange(0.4, 0.8), randomRange(0.1, 0.3));
       meshRef.current.setColorAt(i, color);
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
@@ -130,8 +63,8 @@ const RealisticFoliage = () => {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} receiveShadow position={[0, 0.5, 0]}>
-      <primitive object={pineTuftGeometry} attach="geometry" />
-      <meshStandardMaterial roughness={0.9} metalness={0.1} />
+      <coneGeometry args={[0.5, 1.5, 4]} />
+      <meshStandardMaterial roughness={0.8} metalness={0.1} />
     </instancedMesh>
   );
 };
@@ -232,16 +165,52 @@ const Ornaments = () => {
 };
 
 const Moon = () => {
+  const texture = useTexture('/moon_hand_drawn.png');
+  
+  const shaderArgs = useMemo(() => ({
+    uniforms: {
+      uTexture: { value: texture },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uTexture;
+      varying vec2 vUv;
+      void main() {
+        // Circular Mask
+        vec2 center = vec2(0.5, 0.5);
+        float dist = distance(vUv, center);
+        if (dist > 0.48) discard; // Force round shape, slightly smaller than 0.5 to remove potential border artifacts
+
+        vec4 color = texture2D(uTexture, vUv);
+        
+        // 1. Brightness calculation
+        float brightness = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        
+        // 2. Emission Logic
+        float emissionFactor = smoothstep(0.3, 0.6, brightness);
+        vec3 finalColor = color.rgb + (color.rgb * emissionFactor * 2.0); 
+        
+        gl_FragColor = vec4(finalColor, color.a);
+      }
+    `,
+    transparent: true,
+  }), [texture]);
+
   return (
     <group position={[0, 7.8, 0]}>
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.2}>
-        {/* Core Moon */}
-        <mesh>
-          <sphereGeometry args={[0.4, 32, 32]} />
-          <meshStandardMaterial color="#fffacd" emissive="#fffacd" emissiveIntensity={4} toneMapped={false} />
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
+        <mesh rotation={[0, 0, 0]}>
+          <planeGeometry args={[0.8, 0.8]} />
+          <shaderMaterial args={[shaderArgs]} side={THREE.DoubleSide} transparent />
         </mesh>
         {/* Glow Halo */}
-        <pointLight color="#fffacd" intensity={2} distance={10} decay={2} />
+        <pointLight color="#ffddaa" intensity={0.8} distance={10} decay={2} position={[0, 0, 1]} />
       </Float>
     </group>
   );
@@ -315,53 +284,30 @@ const Gifts = () => {
 };
 
 const LightStrips = () => {
-  // Create strips that look like they are draped over the gifts
+  // Create a few "strips" of warm light on the ground/gifts
   const strips = useMemo(() => {
-    const items: THREE.CatmullRomCurve3[] = [];
-    // Gift cluster approximate locations
-    const clusters = [
-        { x: 2.5, z: 0 },
-        { x: -1.4, z: 2.4 }, // ~120 deg
-        { x: -1.3, z: -2.2 } // ~240 deg
-    ];
-    
-    // Pick 1 or 2 clusters to have lights on them
-    const activeClusters = clusters.sort(() => Math.random() - 0.5).slice(0, Math.random() > 0.5 ? 2 : 1);
-
-    activeClusters.forEach(cluster => {
-        // Create a messy coil/curve on top of this cluster
-        const points = [];
-        const coilCount = 15;
-        for(let i=0; i<coilCount; i++) {
-            const t = i / coilCount;
-            const angle = t * Math.PI * 4; // 2 loops
-            const r = 0.6 + Math.random() * 0.3;
-            
-            // Center on the cluster
-            const cx = cluster.x + Math.cos(angle) * r;
-            const cz = cluster.z + Math.sin(angle) * r;
-            // Height varies to look like it's on boxes (0.3 to 0.8)
-            const cy = 0.4 + Math.sin(t * Math.PI * 3) * 0.2 + Math.random() * 0.2;
-            
-            points.push(new THREE.Vector3(cx, cy, cz));
-        }
-        const curve = new THREE.CatmullRomCurve3(points, false);
-        items.push(curve);
-    });
-    
+    const items = [];
+    for (let i = 0; i < 5; i++) {
+      const angle = (Math.PI * 2 * i) / 5;
+      const r = 3.0;
+      const x = Math.cos(angle) * r;
+      const z = Math.sin(angle) * r;
+      items.push({ position: [x, 0.1, z] as [number, number, number] });
+    }
     return items;
   }, []);
 
   return (
     <group>
-      {strips.map((curve, i) => (
-        <group key={i}>
-          <mesh>
-            <tubeGeometry args={[curve, 64, 0.04, 8, false]} />
-            <meshStandardMaterial color="#ffaa33" emissive="#ffaa33" emissiveIntensity={3} toneMapped={false} />
+      {strips.map((s, i) => (
+        <group key={i} position={s.position}>
+          {/* Glowing Strip Geometry */}
+          <mesh rotation={[Math.PI/2, 0, Math.random() * Math.PI]}>
+            <torusGeometry args={[0.8, 0.05, 8, 32, Math.PI]} />
+            <meshStandardMaterial color="#ffaa33" emissive="#ffaa33" emissiveIntensity={5} toneMapped={false} />
           </mesh>
-          {/* A few point lights for glow */}
-          <pointLight position={curve.getPoint(0.5)} color="#ffaa33" intensity={0.8} distance={3} decay={2} />
+          {/* Light Source for the Strip */}
+          <pointLight color="#ffaa33" intensity={1.5} distance={4} decay={2} position={[0, 0.5, 0]} />
         </group>
       ))}
     </group>
@@ -481,15 +427,15 @@ const Snow = ({ speed }: { speed: number }) => {
 };
 
 export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showControls }) => {
-  const [isInteractive, setIsInteractive] = useState(false);
+  const [isInteractive, setIsInteractive] = useState(true);
   const [snowSpeed, setSnowSpeed] = useState(0.2); // Default slow speed
 
-  // Reset interactivity when controls are hidden
-  React.useEffect(() => {
-    if (!showControls) {
-      setIsInteractive(false);
-    }
-  }, [showControls]);
+  // Reset interactivity when controls are hidden - DISABLED by user request
+  // React.useEffect(() => {
+  //   if (!showControls) {
+  //     setIsInteractive(false);
+  //   }
+  // }, [showControls]);
 
   return (
     <div className={`absolute inset-0 w-full h-full bg-[#050a14] transition-all duration-500 ${isInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}>
@@ -521,16 +467,18 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
         {/* Central Tree Glow (compensating for removed individual lights) */}
         <pointLight position={[0, 3, 0]} intensity={2} color="#ffaa00" distance={8} decay={2} />
 
-        <group position={[0, -1, 0]}>
-            <Trunk />
-            <RealisticFoliage />
-            <FairyLights />
-            <Ornaments />
-            <Moon />
-            <Ground />
-            <Gifts />
-            <LightStrips />
-        </group>
+        <Suspense fallback={null}>
+          <group position={[0, -1, 0]}>
+              <Trunk />
+              <RealisticFoliage />
+              <FairyLights />
+              <Ornaments />
+              <Moon />
+              <Ground />
+              <Gifts />
+              <LightStrips />
+          </group>
+        </Suspense>
 
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />
         <Snow speed={snowSpeed} />
@@ -539,7 +487,7 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
             enableZoom={isInteractive} 
             enablePan={isInteractive} 
             enableRotate={isInteractive}
-            autoRotate={!isInteractive}
+            autoRotate={false}
             autoRotateSpeed={0.5}
             target={[0, 2, 0]}
         />

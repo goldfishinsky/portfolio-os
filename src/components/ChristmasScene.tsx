@@ -197,7 +197,7 @@ const Moon = () => {
         // Low brightness (Marker) -> Stay Dark (or get darker)
         
         float emissionFactor = smoothstep(0.5, 0.8, brightness);
-        vec3 finalColor = color.rgb + (color.rgb * emissionFactor * 1.5);
+        vec3 finalColor = color.rgb + (color.rgb * emissionFactor * 5.0);
         
         // Deepen the shadows for the "Marker" part to ensure high contrast
         if (brightness < 0.5) {

@@ -102,10 +102,12 @@ export const Desktop: React.FC = () => {
             className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
           >
             <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <img src="/minion-icon.png" alt="Xmas Control" className="w-14 h-14 object-cover rounded-xl drop-shadow-md" />
+              <div className="w-14 h-14 bg-transparent rounded-[14px] flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+                <img src="/minion_icon_final.png" alt="Christmas Settings" className="w-full h-full object-cover" />
+              </div>
             </div>
             <span className="text-xs text-center font-medium drop-shadow-md line-clamp-2 leading-tight bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
-              Xmas Control
+              Christmas Settings
             </span>
           </button>
 

@@ -182,19 +182,27 @@ const Moon = () => {
       uniform sampler2D uTexture;
       varying vec2 vUv;
       void main() {
-        // Circular Mask
-        vec2 center = vec2(0.5, 0.5);
-        float dist = distance(vUv, center);
-        if (dist > 0.48) discard; // Force round shape, slightly smaller than 0.5 to remove potential border artifacts
-
         vec4 color = texture2D(uTexture, vUv);
         
-        // 1. Brightness calculation
+        // 1. White Background Removal (Chroma Key)
+        // Discard if pixel is very bright white (background)
+        // We check if all channels are > 0.9
+        if (color.r > 0.9 && color.g > 0.9 && color.b > 0.9) discard;
+
+        // 2. Brightness calculation
         float brightness = dot(color.rgb, vec3(0.299, 0.587, 0.114));
         
-        // 2. Emission Logic
-        float emissionFactor = smoothstep(0.3, 0.6, brightness);
-        vec3 finalColor = color.rgb + (color.rgb * emissionFactor * 2.0); 
+        // 3. Emission & Shadow Logic
+        // High brightness (Beige) -> Glow
+        // Low brightness (Marker) -> Stay Dark (or get darker)
+        
+        float emissionFactor = smoothstep(0.5, 0.8, brightness);
+        vec3 finalColor = color.rgb + (color.rgb * emissionFactor * 1.5);
+        
+        // Deepen the shadows for the "Marker" part to ensure high contrast
+        if (brightness < 0.5) {
+            finalColor *= 0.5; 
+        }
         
         gl_FragColor = vec4(finalColor, color.a);
       }

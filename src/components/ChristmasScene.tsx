@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture } from '@react-three/drei';
+import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -217,6 +217,18 @@ const Moon = () => {
           <planeGeometry args={[0.8, 0.8]} />
           <shaderMaterial args={[shaderArgs]} side={THREE.DoubleSide} transparent />
         </mesh>
+        {/* Easter Egg Text - Wrapped in Suspense to prevent blocking the whole scene */}
+        <Suspense fallback={null}>
+          <Text
+            position={[-0.12, -0.28, 0.01]} // Top-left of the lowest point
+            fontSize={0.008} 
+            color="#2a2a2a" // Dark charcoal to blend with marker
+            anchorX="center"
+            anchorY="middle"
+          >
+            by ziqian
+          </Text>
+        </Suspense>
         {/* Glow Halo */}
         <pointLight color="#ffddaa" intensity={0.8} distance={10} decay={2} position={[0, 0, 1]} />
       </Float>

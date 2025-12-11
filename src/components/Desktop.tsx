@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOSStore } from '../store/osStore';
 import { apps } from '../config/apps';
 import { Taskbar } from './Taskbar';

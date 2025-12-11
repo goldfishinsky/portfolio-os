@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Wifi, Battery, Search, Command, Sun, Moon } from 'lucide-react';
+import { Wifi, Battery, Search, Command, Sun, Moon, Maximize, Minimize } from 'lucide-react';
 import { useOSStore } from '../store/osStore';
 import { useThemeStore } from '../store/themeStore';
 import { apps } from '../config/apps';
@@ -11,11 +11,28 @@ export const MenuBar: React.FC = () => {
   const { activeWindowId, windows } = useOSStore();
   const { isDarkMode, toggleTheme } = useThemeStore();
   const [time, setTime] = useState(new Date());
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const activeAppId = windows.find(w => w.id === activeWindowId)?.appId;
   const activeAppName = activeAppId ? apps[activeAppId]?.title : 'Finder';
@@ -52,7 +69,13 @@ export const MenuBar: React.FC = () => {
           <Battery size={18} />
           <Wifi size={16} />
           <Search size={16} />
-          <Command size={16} />
+          <button
+            onClick={toggleFullscreen}
+            className="hover:bg-white/20 p-1 rounded transition-colors"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+          </button>
         </div>
         <div className="cursor-default hover:bg-white/20 px-2 py-0.5 rounded transition-colors">
           {format(time, 'EEE MMM d h:mm aa')}

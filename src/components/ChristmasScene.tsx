@@ -222,7 +222,7 @@ const Moon = () => {
           <Text
             position={[-0.12, -0.28, 0.01]} // Top-left of the lowest point
             fontSize={0.008} 
-            color="#2a2a2a" // Dark charcoal to blend with marker
+            color="#555555" // Grey
             anchorX="center"
             anchorY="middle"
           >

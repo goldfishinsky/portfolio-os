@@ -41,8 +41,8 @@ export const Quadrant: React.FC<QuadrantProps> = ({
     return true;
   });
 
-  const handleKeyDown = async (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTaskTitle.trim()) {
+  const handleSave = async () => {
+    if (newTaskTitle.trim()) {
       await addTodo({
         title: newTaskTitle,
         quadrant,
@@ -50,6 +50,14 @@ export const Quadrant: React.FC<QuadrantProps> = ({
       });
       setNewTaskTitle('');
       setIsAdding(false);
+    } else {
+      setIsAdding(false);
+    }
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      await handleSave();
     } else if (e.key === 'Escape') {
       setIsAdding(false);
       setNewTaskTitle('');
@@ -83,7 +91,7 @@ export const Quadrant: React.FC<QuadrantProps> = ({
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={handleKeyDown}
-              onBlur={() => { if (!newTaskTitle.trim()) setIsAdding(false); }}
+              onBlur={handleSave}
               placeholder="Type a new task..."
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:border-white/20 transition-all backdrop-blur-sm"
             />

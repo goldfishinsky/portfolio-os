@@ -104,18 +104,76 @@ const CHORDS: Chord[] = [
 
 // Scales removed in favor of dynamic generation
 
+// --- Audio Engine ---
+
+class GuitarAudio {
+  private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
+
+  private init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.masterGain.connect(this.ctx.destination);
+    }
+  }
+
+  playNote(stringIndex: number, fret: number) {
+    this.init();
+    if (!this.ctx || !this.masterGain) return;
+
+    // Calculate frequency
+    // E2 is 82.41 Hz (Low E)
+    // String base frequencies: E2, A2, D3, G3, B3, E4
+    const baseFreqs = [329.63, 246.94, 196.00, 146.83, 110.00, 82.41]; // High E to Low E
+    const baseFreq = baseFreqs[stringIndex];
+    const frequency = baseFreq * Math.pow(2, fret / 12);
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    // Use sawtooth for a richer, string-like sound
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+
+    // Filter to soften the sound
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1000 + (frequency * 2), this.ctx.currentTime);
+    filter.Q.value = 0.5;
+
+    // Envelope
+    const now = this.ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + 0.02); // Attack
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5); // Decay
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 2);
+  }
+}
+
+const guitarAudio = new GuitarAudio();
+
 // --- Components ---
 
 const Fretboard = ({ 
   showNotes = true, 
   highlightNotes = [] as string[], 
   fretRange,
-  onlyNatural = false 
+  onlyNatural = false,
+  onNoteClick
 }: { 
   showNotes?: boolean, 
   highlightNotes?: string[], 
   fretRange?: [number, number],
-  onlyNatural?: boolean
+  onlyNatural?: boolean,
+  onNoteClick?: (stringIndex: number, fret: number) => void
 }) => {
   const frets = 15;
 
@@ -171,7 +229,11 @@ const Fretboard = ({
                 const isDimmed = fretRange && !inRange;
 
                 return (
-                  <div key={fretIndex} className={`flex-1 flex items-center justify-center z-10 border-r-2 border-gray-500/30 h-full ${isDimmed ? 'bg-black/20' : ''}`}>
+                  <div 
+                    key={fretIndex} 
+                    className={`flex-1 flex items-center justify-center z-10 border-r-2 border-gray-500/30 h-full ${isDimmed ? 'bg-black/20' : ''} cursor-pointer hover:bg-white/5`}
+                    onClick={() => onNoteClick?.(stringIndex, fretNum)}
+                  >
                     {shouldShow && (
                       <div className={`
                         w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-all
@@ -489,7 +551,12 @@ export const Guitar = () => {
                         <p className="text-gray-500">Notes: {currentScaleNotes.join(', ')}</p>
                     </div>
                     <div className="flex-1 flex items-center justify-center">
-                        <Fretboard showNotes={true} highlightNotes={currentScaleNotes} onlyNatural={false} />
+                        <Fretboard 
+                            showNotes={true} 
+                            highlightNotes={currentScaleNotes} 
+                            onlyNatural={false} 
+                            onNoteClick={(s, f) => guitarAudio.playNote(s, f)}
+                        />
                     </div>
                 </div>
             </div>
@@ -502,7 +569,11 @@ export const Guitar = () => {
                     <span className="text-sm text-gray-500">Showing Natural Notes Only</span>
                 </div>
                 <div className="bg-white dark:bg-[#1a1a1a] p-6 rounded-xl border border-gray-200 dark:border-gray-800 flex-1 flex items-center justify-center">
-                    <Fretboard showNotes={true} onlyNatural={true} />
+                    <Fretboard 
+                        showNotes={true} 
+                        onlyNatural={true} 
+                        onNoteClick={(s, f) => guitarAudio.playNote(s, f)}
+                    />
                 </div>
             </div>
         )}

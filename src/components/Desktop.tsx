@@ -11,7 +11,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Launchpad } from './Launchpad';
 import { fileSystem } from '../utils/fileSystem';
 import { userConfig } from '../config/userConfig';
-import { FileText, Folder } from 'lucide-react';
+import { FileText, Folder, Music } from 'lucide-react';
 import videoFileIcon from '../assets/icons/video-file.png';
 import { ChristmasScene } from './ChristmasScene';
 
@@ -130,6 +130,19 @@ export const Desktop: React.FC = () => {
               ) : item.icon === 'video' ? (
                 <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img src={videoFileIcon.src} alt="Video" className="w-12 h-12 object-cover rounded-lg drop-shadow-md" />
+                </div>
+              ) : item.icon === 'music' ? (
+                <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg border border-white/20 relative overflow-visible">
+                    <Music size={32} className="text-white drop-shadow-md" stroke="#ffd700" />
+                    {/* Tiny hat on desktop icon */}
+                    <div className="absolute -top-1 -right-1 rotate-12 scale-50">
+                      <div className="w-6 h-4 bg-red-500 rounded-t-full relative">
+                        <div className="absolute -bottom-1 -left-1 w-8 h-2 bg-white rounded-full" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="w-14 h-16 bg-white rounded-[2px] shadow-sm flex flex-col items-center justify-center relative group-hover:brightness-95 transition-all">

@@ -204,3 +204,36 @@ export const GuitarIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const MusicFileIcon = () => (
+  <IconContainer className="bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center relative">
+    {/* Snow sprinkles */}
+    {[...Array(6)].map((_, i) => (
+      <div 
+        key={i} 
+        className="absolute w-1 h-1 bg-white rounded-full opacity-60"
+        style={{ 
+          top: `${Math.random() * 80}%`, 
+          left: `${Math.random() * 80}%`,
+          animation: `pulse 2s infinite ${i * 0.3}s`
+        }} 
+      />
+    ))}
+    
+    <div className="text-white drop-shadow-lg flex flex-col items-center justify-center relative">
+      {/* Santa Hat on the note */}
+      <div className="absolute -top-3 -right-2 rotate-12 scale-75 overflow-visible">
+        <div className="w-8 h-6 bg-red-500 rounded-t-full relative">
+          <div className="absolute -bottom-1 -left-1 w-10 h-3 bg-white rounded-full shadow-sm" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full shadow-sm" />
+        </div>
+      </div>
+      
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 18V5l12-2v13" stroke="#ffd700" /> {/* Gold strokes */}
+        <circle cx="6" cy="18" r="3" fill="#ffffff" stroke="none" /> {/* White note balls */}
+        <circle cx="18" cy="16" r="3" fill="#ffffff" stroke="none" />
+      </svg>
+    </div>
+  </IconContainer>
+);

@@ -5,7 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text, Line } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { Monkey } from './Monkey';
+// import { Monkey } from './Monkey';
 
 // --- Utils ---
 const randomRange = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -696,12 +696,12 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
               <Ground />
               <Gifts />
               <LightStrips />
-              <Monkey 
+{/* <Monkey 
                 position={[2, 0, 2]} 
                 scale={[0.5, 0.5, 0.5]} 
                 treeHeight={7}
                 treeRadius={2.5}
-              />
+              /> */}
               {/* Snow System (Conditional) */}
               {isSnowing && <Snow speed={snowSpeed} />}
               

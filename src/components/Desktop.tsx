@@ -75,7 +75,10 @@ export const Desktop: React.FC = () => {
     <div
       className="h-screen w-screen overflow-hidden relative select-none bg-black"
       onContextMenu={handleContextMenu}
-      onClick={() => setContextMenu(null)}
+      onClick={() => {
+        setContextMenu(null);
+        setShowChristmasControls(false);
+      }}
     >
       {/* 3D Wallpaper Layer */}
       <ChristmasScene showControls={showChristmasControls} />
@@ -98,7 +101,10 @@ export const Desktop: React.FC = () => {
         <div className="absolute top-8 right-0 bottom-20 p-4 flex flex-col flex-wrap content-end gap-6 z-0 items-end pointer-events-auto">
           {/* Christmas Control App */}
           <button
-            onClick={() => setShowChristmasControls(!showChristmasControls)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent background click handler from firing
+              setShowChristmasControls(!showChristmasControls);
+            }}
             className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
           >
             <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">

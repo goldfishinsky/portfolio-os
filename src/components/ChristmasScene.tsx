@@ -633,7 +633,6 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
   const [snowSpeed, setSnowSpeed] = useState(0.2); 
   const [isSnowing, setIsSnowing] = useState(true); // New Toggle
   const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   const config = SCENE_CONFIGS[sceneMode];
 
@@ -729,8 +728,10 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
         </EffectComposer>
       </Canvas>
 
-      {/* Control Panel */}
-      <div className={`absolute top-24 right-4 p-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white pointer-events-auto flex flex-col gap-4 w-64 z-50 transition-all duration-300 ${showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className={`absolute top-24 right-4 p-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white pointer-events-auto flex flex-col gap-4 w-64 z-50 transition-all duration-300 ${showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
+      >
         <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Interactive Mode</span>
             <button 
@@ -738,16 +739,6 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
                 className={`w-12 h-6 rounded-full transition-colors relative ${isInteractive ? 'bg-green-500' : 'bg-gray-600'}`}
             >
                 <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isInteractive ? 'left-7' : 'left-1'}`} />
-            </button>
-        </div>
-
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Ambient Music</span>
-            <button 
-                onClick={() => setIsMusicPlaying(!isMusicPlaying)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isMusicPlaying ? 'bg-green-500' : 'bg-gray-600'}`}
-            >
-                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isMusicPlaying ? 'left-7' : 'left-1'}`} />
             </button>
         </div>
         

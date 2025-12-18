@@ -96,7 +96,9 @@ export const Finder: React.FC = () => {
       navigateTo([...currentPath, item.name]);
     } else {
       // Open file logic
-      if (item.name === 'Resume.pdf') {
+      if (item.metadata?.appId) {
+        openWindow(item.metadata.appId, item.name, undefined, item.metadata);
+      } else if (item.name === 'Resume.pdf') {
         openWindow('resume', 'Resume');
       } else {
         // Default open logic or preview

@@ -34,7 +34,6 @@ export const fileSystem: FileSystemItem = {
             },
           }
         },
-        'Project-Alpha': { name: 'Project-Alpha', type: 'folder', children: {} },
         '小屋.mp3': { 
           name: '小屋.mp3', 
           type: 'file', 

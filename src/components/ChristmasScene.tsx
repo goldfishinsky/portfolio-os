@@ -593,7 +593,7 @@ const Constellations = () => {
     );
 };
 
-const SCENE_CONFIGS = {
+export const SCENE_CONFIGS = {
   night: {
     bg: '#050a14',
     fogColor: '#050a14',
@@ -628,20 +628,20 @@ const SCENE_CONFIGS = {
   }
 };
 
-export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showControls }) => {
-  const [isInteractive, setIsInteractive] = useState(true);
-  const [snowSpeed, setSnowSpeed] = useState(0.2); 
-  const [isSnowing, setIsSnowing] = useState(true); // New Toggle
-  const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
+interface ChristmasSceneProps {
+    isInteractive: boolean;
+    snowSpeed: number;
+    isSnowing: boolean;
+    sceneMode: 'night' | 'sunset';
+}
 
+export const ChristmasScene: React.FC<ChristmasSceneProps> = ({ 
+    isInteractive,
+    snowSpeed,
+    isSnowing,
+    sceneMode
+}) => {
   const config = SCENE_CONFIGS[sceneMode];
-
-  // Reset interactivity when controls are hidden - DISABLED by user request
-  // React.useEffect(() => {
-  //   if (!showControls) {
-  //     setIsInteractive(false);
-  //   }
-  // }, [showControls]);
 
   return (
     <div 
@@ -727,70 +727,6 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
             <Vignette eskil={false} offset={0.1} darkness={0.5} />
         </EffectComposer>
       </Canvas>
-
-      <div 
-        onClick={(e) => e.stopPropagation()}
-        className={`absolute top-24 right-4 p-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white pointer-events-auto flex flex-col gap-4 w-64 z-50 transition-all duration-300 ${showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}
-      >
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Interactive Mode</span>
-            <button 
-                onClick={() => setIsInteractive(!isInteractive)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isInteractive ? 'bg-green-500' : 'bg-gray-600'}`}
-            >
-                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isInteractive ? 'left-7' : 'left-1'}`} />
-            </button>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-            <span className="text-xs text-gray-300">Ambience</span>
-            <div className="flex bg-white/10 rounded-lg p-1">
-                <button 
-                    onClick={() => setSceneMode('night')}
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-all ${sceneMode === 'night' ? 'bg-blue-500/80 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
-                >
-                    Night
-                </button>
-                <button 
-                    onClick={() => setSceneMode('sunset')}
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-all ${sceneMode === 'sunset' ? 'bg-orange-500/80 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
-                >
-                    Sunset
-                </button>
-            </div>
-        </div>
-
-        {/* Snow Toggle */}
-        <div className="flex items-center justify-between">
-            <span className="text-sm font-medium opacity-80">Snow</span>
-            <button 
-                onClick={() => setIsSnowing(!isSnowing)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isSnowing ? 'bg-green-500/50' : 'bg-white/10'}`}
-            >
-                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${isSnowing ? 'translate-x-6' : 'translate-x-0'}`} />
-            </button>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-            <div className="flex justify-between text-xs text-gray-300">
-                <span>Snow Speed</span>
-                <span>{Math.round(snowSpeed * 10)}</span>
-            </div>
-            <input 
-                type="range" 
-                min="0" 
-                max="2" 
-                step="0.1" 
-                value={snowSpeed} 
-                onChange={(e) => setSnowSpeed(parseFloat(e.target.value))}
-                className="w-full accent-white h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-            />
-        </div>
-        
-        <div className="text-[10px] text-gray-400 text-center">
-            {isInteractive ? 'Mouse controls enabled. Desktop clicks blocked.' : 'Wallpaper mode. Desktop clickable.'}
-        </div>
-      </div>
     </div>
   );
 };

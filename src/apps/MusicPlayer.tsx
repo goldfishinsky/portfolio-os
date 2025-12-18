@@ -50,6 +50,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [duration, setDuration] = useState(0);
   const [isLoop, setIsLoop] = useState(true); // Default to true for list loop
   const [volume, setVolume] = useState(0.7);
+  const [showVolumeControl, setShowVolumeControl] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -234,58 +235,76 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </div>
         </div>
 
-        {/* Main Buttons */}
-        <div className="flex items-center justify-between px-4">
-          <button className="text-red-300/50 hover:text-yellow-400 transition-colors">
+        {/* Unified Controls Row */}
+        <div className="flex items-center justify-between px-6">
+          {/* Volume Control (Far Left) */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowVolumeControl(!showVolumeControl)}
+              className={`transition-colors ${showVolumeControl ? 'text-yellow-400' : 'text-red-300/50 hover:text-yellow-400'}`}
+            >
+              <Volume2 size={22} />
+            </button>
+            
+            {showVolumeControl && (
+              <div className="absolute bottom-12 left-0 w-8 h-28 bg-black/90 backdrop-blur-md rounded-xl border border-white/10 flex flex-col items-center justify-end pb-3 pt-3 animate-in fade-in slide-in-from-bottom-2 duration-200 z-50 shadow-2xl">
+                 <div className="h-20 w-1 bg-white/20 rounded-full relative">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-yellow-600 to-yellow-400 rounded-full"
+                      style={{ height: `${volume * 100}%` }}
+                    />
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      style={{ appearance: 'slider-vertical' as any }}
+                    />
+                 </div>
+              </div>
+            )}
+          </div>
+
+          <button className="text-red-300/50 hover:text-yellow-400 transition-colors transform active:scale-95">
             <Shuffle size={20} />
           </button>
           
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-6">
             <button 
               onClick={playPrev}
-              className="text-white hover:text-yellow-400 transition-colors drop-shadow-md"
+              className="text-white hover:text-yellow-400 transition-colors drop-shadow-md transform active:scale-95"
             >
-              <SkipBack size={32} fill="currentColor" />
+              <SkipBack size={26} fill="currentColor" />
             </button>
             <button 
               onClick={togglePlay}
-              className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,0,0.5)] border-2 border-yellow-500/50 hover:scale-105 active:scale-95 transition-all"
+              className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,0,0.5)] border-2 border-yellow-500/50 hover:scale-105 active:scale-95 transition-all"
             >
-              {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}
+              {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
             </button>
             <button 
               onClick={playNext}
-              className="text-white hover:text-yellow-400 transition-colors drop-shadow-md"
+              className="text-white hover:text-yellow-400 transition-colors drop-shadow-md transform active:scale-95"
             >
-              <SkipForward size={32} fill="currentColor" />
+              <SkipForward size={26} fill="currentColor" />
             </button>
           </div>
 
           <button 
             onClick={() => setIsLoop(!isLoop)}
-            className={`transition-colors drop-shadow-md ${isLoop ? 'text-yellow-400' : 'text-red-300/50 hover:text-yellow-400'}`}
+            className={`transition-colors drop-shadow-md transform active:scale-95 ${isLoop ? 'text-yellow-400' : 'text-red-300/50 hover:text-yellow-400'}`}
           >
             <Repeat1 size={20} />
           </button>
-        </div>
 
-        {/* Volume & Details */}
-        <div className="flex items-center space-x-4 px-2">
-          <Volume2 size={18} className="text-red-300/50" />
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={handleVolumeChange}
-            className="flex-1 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-yellow-600"
-          />
           <button 
             onClick={() => setShowPlaylist(!showPlaylist)}
-            className={`transition-colors ${showPlaylist ? 'text-yellow-400' : 'text-red-300/50 hover:text-yellow-400'}`}
+            className={`transition-colors transform active:scale-95 ${showPlaylist ? 'text-yellow-400' : 'text-red-300/50 hover:text-yellow-400'}`}
           >
-            <List size={18} />
+            <List size={22} />
           </button>
         </div>
       </div>

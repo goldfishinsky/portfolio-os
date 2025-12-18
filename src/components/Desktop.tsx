@@ -20,6 +20,12 @@ export const Desktop: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showChristmasControls, setShowChristmasControls] = useState(false);
 
+  // Lifted Christmas Scene State
+  const [isInteractive, setIsInteractive] = useState(true);
+  const [snowSpeed, setSnowSpeed] = useState(0.2); 
+  const [isSnowing, setIsSnowing] = useState(true);
+  const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY });
@@ -63,13 +69,17 @@ export const Desktop: React.FC = () => {
         openWindow('finder', 'Finder');
       }
     } else if (item.metadata?.appId) {
-      openWindow(item.metadata.appId, item.name, undefined, item.metadata);
+       openWindow(item.metadata.appId, item.name, undefined, item.metadata);
     } else if (name === userConfig.system.resumeFilename) {
       openWindow('resume', 'Resume');
     } else {
       alert(`Opening ${name}...`);
     }
   };
+
+  const handleChristmasToggle = React.useCallback(() => {
+    setShowChristmasControls(prev => !prev);
+  }, []);
 
   return (
     <div
@@ -81,7 +91,12 @@ export const Desktop: React.FC = () => {
       }}
     >
       {/* 3D Wallpaper Layer */}
-      <ChristmasScene showControls={showChristmasControls} />
+      <ChristmasScene 
+        isInteractive={isInteractive}
+        snowSpeed={snowSpeed}
+        isSnowing={isSnowing}
+        sceneMode={sceneMode}
+      />
 
       {/* Overlay Layer */}
       <div className="absolute inset-0 bg-black/10 dark:bg-black/20 pointer-events-none transition-colors duration-500 z-0" />
@@ -90,7 +105,16 @@ export const Desktop: React.FC = () => {
       <div className="relative z-10 pointer-events-none h-full w-full">
         {/* Re-enable pointer events for specific UI elements */}
         <div className="pointer-events-auto">
-          <MenuBar />
+          <MenuBar 
+            onChristmasToggle={handleChristmasToggle}
+            showChristmasControls={showChristmasControls}
+            sceneProps={{
+              isInteractive, setIsInteractive,
+              snowSpeed, setSnowSpeed,
+              isSnowing, setIsSnowing,
+              sceneMode, setSceneMode
+            }}
+          />
         </div>
 
         <div className="pointer-events-auto">
@@ -98,30 +122,14 @@ export const Desktop: React.FC = () => {
         </div>
 
         {/* Desktop Icons Area */}
-        <div className="absolute top-8 right-0 bottom-20 p-4 flex flex-col flex-wrap content-end gap-6 z-0 items-end pointer-events-auto">
-          {/* Christmas Control App */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent background click handler from firing
-              setShowChristmasControls(!showChristmasControls);
-            }}
-            className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
-          >
-            <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <div className="w-14 h-14 bg-transparent rounded-[14px] flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
-                <img src="/minion_icon_final.png" alt="Christmas Settings" className="w-full h-full object-cover" />
-              </div>
-            </div>
-            <span className="text-xs text-center font-medium drop-shadow-md line-clamp-2 leading-tight bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
-              Christmas Settings
-            </span>
-          </button>
-
+        <div className="absolute top-8 right-0 bottom-20 p-4 flex flex-col flex-wrap content-end gap-6 z-0 items-end pointer-events-none">
+          {/* Christmas Control App - MOVED TO MENU BAR */}
+          
           {Object.entries(fileSystem.children?.['Desktop']?.children || {}).map(([name, item]) => (
             <button
               key={name}
               onDoubleClick={() => handleDesktopItemClick(name, item)}
-              className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm"
+              className="w-24 flex flex-col items-center gap-1 group text-white text-shadow-sm pointer-events-auto"
             >
               {item.type === 'folder' ? (
                 <div className="w-16 h-16 text-blue-400 drop-shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">

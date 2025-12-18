@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text } from '@react-three/drei';
+import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text, Line } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { Monkey } from './Monkey';
@@ -165,7 +165,7 @@ const Ornaments = () => {
   );
 };
 
-const Moon = () => {
+const Moon = ({ intensity = 0.8 }: { intensity?: number }) => {
   const texture = useTexture('/moon_hand_drawn.png');
   
   const shaderArgs = useMemo(() => ({
@@ -231,7 +231,7 @@ const Moon = () => {
           </Text>
         </Suspense>
         {/* Glow Halo */}
-        <pointLight color="#ffddaa" intensity={0.8} distance={10} decay={2} position={[0, 0, 1]} />
+        <pointLight color="#ffddaa" intensity={intensity} distance={10} decay={2} position={[0, 0, 1]} />
       </Float>
     </group>
   );
@@ -249,8 +249,8 @@ const Trunk = () => {
 const Ground = () => {
     return (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-            <planeGeometry args={[100, 100]} />
-            <meshStandardMaterial color="#eef2ff" roughness={0.5} metalness={0.1} />
+            <planeGeometry args={[400, 400]} />
+            <meshStandardMaterial color="#eef2ff" roughness={1} metalness={0} />
         </mesh>
     );
 };
@@ -334,17 +334,17 @@ const LightStrips = () => {
     </group>
   );
 };
-
 const Snow = ({ speed }: { speed: number }) => {
-  const count = 2000;
+  const count = 3000; // Increased count
   
   // Initial positions
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 25;     // x
+        // Spread snow over a wider area (100x100 instead of 25x25)
+      pos[i * 3] = (Math.random() - 0.5) * 100;     // x
       pos[i * 3 + 1] = Math.random() * 20;         // y
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 25; // z
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 100; // z
     }
     return pos;
   }, []);
@@ -447,9 +447,195 @@ const Snow = ({ speed }: { speed: number }) => {
   );
 };
 
+const Sun = () => {
+    // Simple glow shader
+    const shaderArgs = useMemo(() => ({
+        uniforms: {
+            color: { value: new THREE.Color('#ffaa33') },
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform vec3 color;
+            varying vec2 vUv;
+            void main() {
+                vec2 center = vec2(0.5);
+                float dist = length(vUv - center);
+                float alpha = smoothstep(0.5, 0.4, dist); // Soft edge
+                float core = smoothstep(0.2, 0.0, dist); // Bright core
+                
+                vec3 finalColor = color + vec3(1.0) * core * 0.5;
+                if (alpha < 0.01) discard;
+                gl_FragColor = vec4(finalColor, alpha);
+            }
+        `,
+        transparent: true,
+    }), []);
+
+    return (
+        <group scale={[6, 6, 6]}> {/* Scaled up for distance */}
+            <mesh>
+                <planeGeometry args={[10, 10]} />
+                <shaderMaterial args={[shaderArgs]} transparent />
+            </mesh>
+            <pointLight color="#ff8800" intensity={2} distance={200} decay={1} />
+        </group>
+    );
+};
+
+
+
+const Constellations = () => {
+    // Star coordinates (approximate spherical positions)
+    const stars = useMemo(() => {
+        const items: { pos: [number, number, number], size: number }[] = [];
+        const radius = 90; // Just inside fog
+
+        // Helper to convert RA/Dec-ish to 3D
+        const addStar = (ra: number, dec: number, size: number = 1.2) => {
+            const phi = (90 - dec) * (Math.PI / 180);
+            const theta = (ra * 15) * (Math.PI / 180); // RA in hours to degrees
+            
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            items.push({ pos: [x, y, z], size });
+        };
+
+        // Ursa Major (Big Dipper)
+        addStar(11, 61, 2.0);
+        addStar(11, 56, 2.0);
+        addStar(11.8, 53, 1.8);
+        addStar(12.2, 57, 1.8);
+        addStar(12.9, 56, 2.0);
+        addStar(13.4, 55, 2.0);
+        addStar(13.8, 49, 2.2);
+
+        // Orion
+        // Belt
+        addStar(5.6, -1.9, 2.2);
+        addStar(5.6, -1.2, 2.2);
+        addStar(5.5, -0.3, 2.2);
+        // Shoulders
+        addStar(5.9, 7.4, 2.8); // Betelgeuse (extra bright)
+        addStar(5.4, 6.3, 2.2);
+        // Feet
+        addStar(5.2, -8.2, 2.5); // Rigel
+        addStar(5.8, -9.6, 2.2);
+
+        // Cassiopeia (W Shape) - RA ~0-1h, Dec ~60
+        addStar(0.1, 59, 2.0); // Caph
+        addStar(0.7, 56, 2.2); // Schedar
+        addStar(0.9, 60, 2.1); // Gamma
+        addStar(1.4, 60, 2.0); // Ruchbah
+        addStar(1.9, 63, 1.9); // Segin
+
+        // Cygnus (Northern Cross) - RA ~20h, Dec ~40
+        addStar(20.7, 45, 2.5); // Deneb (Tail) - Bright!
+        addStar(20.4, 40, 2.0); // Sadr (Center)
+        addStar(19.5, 28, 2.0); // Albireo (Head)
+        addStar(20.8, 30, 2.0); // Aljanah (Wing)
+        addStar(19.8, 45, 2.0); // Fawaris (Wing)
+
+        return items;
+    }, []);
+
+    // Pulsing animation
+    const groupRef = useRef<THREE.Group>(null);
+    useFrame((state) => {
+        if (!groupRef.current) return;
+        const t = state.clock.getElapsedTime();
+        groupRef.current.children.forEach((child, i) => {
+             // Twinkle effect: oscillate scale slightly
+             if (child instanceof THREE.Mesh) {
+                const twinkle = Math.sin(t * 3 + i * 10) * 0.2 + 1.0; 
+                child.scale.setScalar(twinkle);
+             }
+        });
+    });
+
+    return (
+        <group ref={groupRef} rotation={[0.5, 0, 0]}> {/* Tilt sky slightly */}
+            {stars.map((s, i) => (
+                <mesh key={i} position={s.pos}>
+                    <sphereGeometry args={[0.3 * s.size, 16, 16]} />
+                    <meshBasicMaterial color="#ffffff" toneMapped={false} />
+                    {/* Stronger glow for visibility */}
+                    <pointLight color="white" intensity={1.5} distance={15} />
+                </mesh>
+            ))}
+
+            {/* Labels */}
+            <group>
+                 {/* Ursa Major */}
+                 <Text position={[stars[3].pos[0], stars[3].pos[1] + 5, stars[3].pos[2]]} fontSize={2} color="white" fillOpacity={0.6}>
+                    Ursa Major
+                 </Text>
+                 {/* Orion */}
+                 <Text position={[stars[8].pos[0] + 5, stars[8].pos[1] - 5, stars[8].pos[2]]} fontSize={2} color="white" fillOpacity={0.6}>
+                    Orion
+                 </Text>
+                 {/* Cassiopeia (Index 14-18, Center around 16) */}
+                 <Text position={[stars[16].pos[0], stars[16].pos[1] + 5, stars[16].pos[2]]} fontSize={2} color="white" fillOpacity={0.6}>
+                    Cassiopeia
+                 </Text>
+                 {/* Cygnus (Index 19-23, Center around 20) */}
+                 <Text position={[stars[20].pos[0] + 2, stars[20].pos[1] + 5, stars[20].pos[2]]} fontSize={2} color="white" fillOpacity={0.6}>
+                    Cygnus
+                 </Text>
+            </group>
+        </group>
+    );
+};
+
+const SCENE_CONFIGS = {
+  night: {
+    bg: '#050a14',
+    fogColor: '#050a14',
+    fogNear: 20, 
+    fogFar: 90, 
+    ambientIntensity: 0.1,
+    sunPosition: [20, 40, -20] as [number, number, number],
+    sunColor: '#aaccff',
+    sunIntensity: 1.5,
+    fillLightColor: '#ffaa00',
+    starOpacity: 1,
+    bloomThreshold: 1,
+    bloomIntensity: 1.5,
+    celestialBody: 'moon' as const,
+    moonGlow: 0.8
+  },
+  sunset: {
+    bg: '#2a1b2e',
+    fogColor: '#4a2b38',
+    fogNear: 20,
+    fogFar: 150, 
+    ambientIntensity: 0.2,
+    sunPosition: [0, 5, -300] as [number, number, number],
+    sunColor: '#ff6622',
+    sunIntensity: 2.5,
+    fillLightColor: '#ff8844',
+    starOpacity: 0.3,
+    bloomThreshold: 0.8,
+    bloomIntensity: 2.0,
+    celestialBody: 'sun' as const,
+    moonGlow: 0 // Moon visible but no light
+  }
+};
+
 export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showControls }) => {
   const [isInteractive, setIsInteractive] = useState(true);
-  const [snowSpeed, setSnowSpeed] = useState(0.2); // Default slow speed
+  const [snowSpeed, setSnowSpeed] = useState(0.2); 
+  const [isSnowing, setIsSnowing] = useState(true); // New Toggle
+  const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
+  const config = SCENE_CONFIGS[sceneMode];
 
   // Reset interactivity when controls are hidden - DISABLED by user request
   // React.useEffect(() => {
@@ -459,7 +645,10 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
   // }, [showControls]);
 
   return (
-    <div className={`absolute inset-0 w-full h-full bg-[#050a14] transition-all duration-500 ${isInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+    <div 
+      className={`absolute inset-0 w-full h-full transition-colors duration-1000 ${isInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      style={{ backgroundColor: config.bg }}
+    >
       <Canvas 
         shadows 
         dpr={[1, 1.5]} 
@@ -467,24 +656,24 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
         performance={{ min: 0.5 }}
         camera={{ position: [0, 2, 18], fov: 45 }}
       >
-        <fog attach="fog" args={['#050a14', 10, 40]} />
+        <fog attach="fog" args={[config.fogColor, config.fogNear, config.fogFar]} />
         
         {/* Lighting Setup for "Warm & Moonlit" look */}
-        <ambientLight intensity={0.1} />
+        <ambientLight intensity={config.ambientIntensity} />
         
         {/* Moonlight (Cool Blue) */}
         <directionalLight 
-          position={[5, 10, -5]} 
-          intensity={1.5} 
-          color="#aaccff" 
+          position={config.sunPosition} 
+          intensity={config.sunIntensity} 
+          color={config.sunColor} 
           castShadow 
           shadow-bias={-0.0001}
           shadow-mapSize={[512, 512]}
         />
         
         {/* Warm Fill from Tree Lights */}
-        <pointLight position={[2, 4, 2]} intensity={1} color="#ffaa00" distance={10} />
-        <pointLight position={[-2, 2, 3]} intensity={1} color="#ffaa00" distance={10} />
+        <pointLight position={[2, 4, 2]} intensity={1} color={config.fillLightColor} distance={10} />
+        <pointLight position={[-2, 2, 3]} intensity={1} color={config.fillLightColor} distance={10} />
         {/* Central Tree Glow (compensating for removed individual lights) */}
         <pointLight position={[0, 3, 0]} intensity={2} color="#ffaa00" distance={8} decay={2} />
 
@@ -494,7 +683,17 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
               <RealisticFoliage />
               <FairyLights />
               <Ornaments />
-              <Moon />
+              
+              {/* Celestial Body */}
+              {/* Celestial Body */}
+              {config.celestialBody === 'moon' ? (
+                <Moon intensity={config.moonGlow} />
+              ) : (
+                <group position={config.sunPosition}>
+                   <Sun />
+                </group>
+              )}
+
               <Ground />
               <Gifts />
               <LightStrips />
@@ -504,11 +703,15 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
                 treeHeight={7}
                 treeRadius={2.5}
               />
+              {/* Snow System (Conditional) */}
+              {isSnowing && <Snow speed={snowSpeed} />}
+              
+              {/* New Constellations */}
+              {config.starOpacity > 0.5 && <Constellations />}
           </group>
         </Suspense>
 
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />
-        <Snow speed={snowSpeed} />
         
         <OrbitControls 
             enableZoom={isInteractive} 
@@ -521,7 +724,7 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
 
         {/* Post Processing for the "Magical" Look */}
         <EffectComposer multisampling={0}>
-            <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} radius={0.4} />
+            <Bloom luminanceThreshold={config.bloomThreshold} mipmapBlur intensity={config.bloomIntensity} radius={0.4} />
             <Vignette eskil={false} offset={0.1} darkness={0.5} />
         </EffectComposer>
       </Canvas>
@@ -535,6 +738,45 @@ export const ChristmasScene: React.FC<{ showControls: boolean }> = ({ showContro
                 className={`w-12 h-6 rounded-full transition-colors relative ${isInteractive ? 'bg-green-500' : 'bg-gray-600'}`}
             >
                 <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isInteractive ? 'left-7' : 'left-1'}`} />
+            </button>
+        </div>
+
+        <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Ambient Music</span>
+            <button 
+                onClick={() => setIsMusicPlaying(!isMusicPlaying)}
+                className={`w-12 h-6 rounded-full transition-colors relative ${isMusicPlaying ? 'bg-green-500' : 'bg-gray-600'}`}
+            >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isMusicPlaying ? 'left-7' : 'left-1'}`} />
+            </button>
+        </div>
+        
+        <div className="flex flex-col gap-2">
+            <span className="text-xs text-gray-300">Ambience</span>
+            <div className="flex bg-white/10 rounded-lg p-1">
+                <button 
+                    onClick={() => setSceneMode('night')}
+                    className={`flex-1 text-xs py-1.5 rounded-md transition-all ${sceneMode === 'night' ? 'bg-blue-500/80 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                >
+                    Night
+                </button>
+                <button 
+                    onClick={() => setSceneMode('sunset')}
+                    className={`flex-1 text-xs py-1.5 rounded-md transition-all ${sceneMode === 'sunset' ? 'bg-orange-500/80 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                >
+                    Sunset
+                </button>
+            </div>
+        </div>
+
+        {/* Snow Toggle */}
+        <div className="flex items-center justify-between">
+            <span className="text-sm font-medium opacity-80">Snow</span>
+            <button 
+                onClick={() => setIsSnowing(!isSnowing)}
+                className={`w-12 h-6 rounded-full transition-colors relative ${isSnowing ? 'bg-green-500/50' : 'bg-white/10'}`}
+            >
+                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${isSnowing ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
         </div>
         

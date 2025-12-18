@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jalen Studio - 一只🐳的小屋",
+  title: "Jalen Studio 🐳的小屋",
   description: "Jalen Studio - 一只鲸鱼的小屋，充满了探索与创意。",
 };
 

@@ -37,9 +37,9 @@ const SidebarItem: React.FC<{
   </div>
 );
 
-export const Finder: React.FC = () => {
-  const [currentPath, setCurrentPath] = useState<string[]>(['Desktop']);
-  const [history, setHistory] = useState<string[][]>([['Desktop']]);
+export const Finder: React.FC<{ initialPath?: string[] }> = ({ initialPath }) => {
+  const [currentPath, setCurrentPath] = useState<string[]>(initialPath || ['Desktop']);
+  const [history, setHistory] = useState<string[][]>([initialPath || ['Desktop']]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedItem, setSelectedItem] = useState<string | null>(null);

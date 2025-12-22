@@ -13,26 +13,7 @@ export const fileSystem: FileSystemItem = {
         'Vlogs': {
           name: 'Vlogs',
           type: 'folder',
-          children: {
-            'Tokyo Trip.mp4': { 
-              name: 'Tokyo Trip.mp4', 
-              type: 'file', 
-              icon: 'video',
-              metadata: { appId: 'video-player', bvid: 'BV1xq63YUEqY' }
-            },
-            'Coding Setup.mp4': { 
-              name: 'Coding Setup.mp4', 
-              type: 'file', 
-              icon: 'video',
-              metadata: { appId: 'video-player', bvid: 'BV1Ec41187GM' }
-            },
-            'Day in Life.mp4': { 
-              name: 'Day in Life.mp4', 
-              type: 'file', 
-              icon: 'video',
-              metadata: { appId: 'video-player', bvid: 'BV1C4HjzsEHs' }
-            },
-          }
+          children: {}
         },
         '小屋.mp3': { 
           name: '小屋.mp3', 

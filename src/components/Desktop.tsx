@@ -58,13 +58,8 @@ export const Desktop: React.FC = () => {
       // Since Finder isn't fully implemented for paths, we'll just open the folder if it's Vlogs by name for now, 
       // or generic Finder. Ideally Finder should take a path prop.
       if (name === 'Vlogs') {
-        // We don't have a full file browser yet, so we'll just show the children on desktop? 
-        // Or maybe we can make a simple "Folder View" window?
-        // For this task, the user asked to "put them in a folder and double click to open".
-        // If I open a folder, it should probably open a Finder window showing those files.
-        // But Finder implementation is complex. 
-        // Let's just open Finder for now.
-        openWindow('finder', name);
+        // Open Finder with specific path
+        openWindow('finder', name, undefined, { initialPath: ['Desktop', 'Vlogs'] });
       } else {
         openWindow('finder', 'Finder');
       }
@@ -79,6 +74,20 @@ export const Desktop: React.FC = () => {
 
   const handleChristmasToggle = React.useCallback(() => {
     setShowChristmasControls(prev => !prev);
+  }, []);
+
+    // Force re-render after vlogs are loaded
+    const [, setForceUpdate] = useState(0);
+
+    useEffect(() => {
+    // Fetch vlogs on mount
+    import('../utils/bilibili').then(({ fetchBilibiliVlogs }) => {
+      fetchBilibiliVlogs().then(success => {
+        if (success) {
+          setForceUpdate(n => n + 1);
+        }
+      });
+    });
   }, []);
 
   return (

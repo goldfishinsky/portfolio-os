@@ -5,15 +5,32 @@ interface VideoPlayerProps {
   title?: string;
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ bvid }) => {
-  const [currentBvid, setCurrentBvid] = useState(bvid || 'BV1xq63YUEqY'); // Default to first video
+import { fileSystem } from '../utils/fileSystem';
 
-  // List of vlogs for the sidebar/playlist
-  const vlogs = [
-    { id: 'BV1xq63YUEqY', title: 'Vlog 1: Tokyo Trip' },
-    { id: 'BV1Ec41187GM', title: 'Vlog 2: Coding Setup' },
-    { id: 'BV1C4HjzsEHs', title: 'Vlog 3: Day in Life' },
-  ];
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({ bvid }) => {
+  // Get vlogs dynamically from fileSystem
+  const getVlogs = () => {
+    const vlogsFolder = fileSystem.children?.['Desktop']?.children?.['Vlogs'];
+    if (vlogsFolder && vlogsFolder.children) {
+      return Object.values(vlogsFolder.children)
+        .filter((file) => file.metadata?.appId === 'video-player')
+        .map((file) => ({
+          id: file.metadata.bvid,
+          title: file.metadata.title,
+          cover: file.metadata.cover,
+        }));
+    }
+    return [];
+  };
+
+  const vlogs = getVlogs();
+  const [currentBvid, setCurrentBvid] = useState(bvid || (vlogs.length > 0 ? vlogs[0].id : 'BV1xq63YUEqY')); 
+
+  // Effect to update current video if props change or initial load
+  React.useEffect(() => {
+    if (bvid) setCurrentBvid(bvid);
+    else if (vlogs.length > 0 && !currentBvid) setCurrentBvid(vlogs[0].id);
+  }, [bvid, vlogs.length]);
 
   return (
     <div className="flex h-full w-full bg-black text-white overflow-hidden">
@@ -33,7 +50,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ bvid }) => {
                   : 'text-gray-400 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <div className="line-clamp-1">{vlog.title}</div>
+              <div className="line-clamp-2">{vlog.title}</div>
             </button>
           ))}
         </div>

@@ -14,6 +14,7 @@ import { userConfig } from '../config/userConfig';
 import { FileText, Folder, Music } from 'lucide-react';
 import videoFileIcon from '../assets/icons/video-file.png';
 import { ChristmasScene } from './ChristmasScene';
+import { GlobalAudioPlayer } from './GlobalAudioPlayer';
 
 export const Desktop: React.FC = () => {
   const { windows, openWindow } = useOSStore();
@@ -117,6 +118,7 @@ export const Desktop: React.FC = () => {
       <div className="absolute inset-0 bg-black/10 dark:bg-black/20 pointer-events-none transition-colors duration-500 z-0" />
 
       {/* System Components */}
+      <GlobalAudioPlayer />
       <div className="relative z-10 pointer-events-none h-full w-full">
         {/* Re-enable pointer events for specific UI elements */}
         <div className="pointer-events-auto">

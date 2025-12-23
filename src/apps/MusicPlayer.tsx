@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Repeat1, Shuffle, List } from 'lucide-react';
+import { useMusicStore } from '../store/musicStore';
 
 interface MusicPlayerProps {
   url?: string;
@@ -9,34 +10,6 @@ interface MusicPlayerProps {
   artist?: string;
   cover?: string;
 }
-
-interface MusicPlayerProps {
-  url?: string;
-  title?: string;
-  artist?: string;
-  cover?: string;
-}
-
-const PLAYLIST = [
-  {
-    title: '小屋',
-    artist: '赵雷',
-    url: 'https://owhqrvhsxmpmrecxavug.supabase.co/storage/v1/object/sign/like/little%20room_zhaolei.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGRmNGI3Yi0zZDg2LTQ0NGEtYTliNC01NGNkNzc5OGRkMzUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJsaWtlL2xpdHRsZSByb29tX3poYW9sZWkubXAzIiwiaWF0IjoxNzY2MDkzNDAxLCJleHAiOjE3OTc2Mjk0MDF9.9Jj5kY_I4Kki5pZ5X1zLuzfdjrwCJQyrt-e_jJwowmU', // URL from fileSystem.ts
-    cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60'
-  },
-  {
-    title: '咬春',
-    artist: '赵雷',
-    url: 'https://owhqrvhsxmpmrecxavug.supabase.co/storage/v1/object/sign/like/bite%20spring.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGRmNGI3Yi0zZDg2LTQ0NGEtYTliNC01NGNkNzc5OGRkMzUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJsaWtlL2JpdGUgc3ByaW5nLm1wMyIsImlhdCI6MTc2NjA5NzQ5OSwiZXhwIjoxNzk3NjMzNDk5fQ.mIz20gIT4ofbFSAchsrBKJsQvNeVEH9DOeCx48CFfyk',
-    cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60'
-  },
-  {
-    title: '难受',
-    artist: '赵雷',
-    url: 'https://owhqrvhsxmpmrecxavug.supabase.co/storage/v1/object/sign/like/tough.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGRmNGI3Yi0zZDg2LTQ0NGEtYTliNC01NGNkNzc5OGRkMzUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJsaWtlL3RvdWdoLm1wMyIsImlhdCI6MTc2NjA5NzUyOSwiZXhwIjoxNzk3NjMzNTI5fQ.TvF05Kf8il0Dge7yyhwyvEQ08PBGLJEM6qIKBNjghd0',
-    cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=60'
-  }
-];
 
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({ 
   url: initialUrl, 
@@ -44,91 +17,35 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   artist: initialArtist,
   cover: initialCover
 }) => {
-  const [currentSongIndex, setCurrentSongIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isLoop, setIsLoop] = useState(true); // Default to true for list loop
-  const [volume, setVolume] = useState(0.7);
+  const { 
+    playlist,
+    currentSongIndex,
+    isPlaying,
+    progress,
+    duration,
+    volume,
+    isLoop,
+    togglePlay,
+    playNext,
+    playPrev,
+    setVolume,
+    setIsLoop,
+    setCurrentSongIndex,
+    setProgress
+  } = useMusicStore();
+
   const [showVolumeControl, setShowVolumeControl] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
-  const currentSong = PLAYLIST[currentSongIndex];
-
-  // If props are passed (e.g. from file click), they define the "current" song context, 
-  // but for now we prioritize our hardcoded playlist as per user request.
-  // We can merge them if needed, but the request was specific to these songs.
-  
-  useEffect(() => {
-    if (audioRef.current) {
-        // Handle play state change
-        if (isPlaying) {
-            audioRef.current.play().catch(e => console.error("Play failed:", e));
-        } else {
-            audioRef.current.pause();
-        }
-    }
-  }, [isPlaying, currentSongIndex]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const playNext = () => {
-    let nextIndex = currentSongIndex + 1;
-    if (nextIndex >= PLAYLIST.length) {
-      nextIndex = 0; // Loop back to start
-    }
-    setCurrentSongIndex(nextIndex);
-    setIsPlaying(true);
-  };
-
-  const playPrev = () => {
-    let prevIndex = currentSongIndex - 1;
-    if (prevIndex < 0) {
-      prevIndex = PLAYLIST.length - 1;
-    }
-    setCurrentSongIndex(prevIndex);
-    setIsPlaying(true);
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setProgress(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
+  const currentSong = playlist[currentSongIndex];
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setProgress(time);
-    }
+    setProgress(time);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(parseFloat(e.target.value));
-  };
-
-  const handleEnded = () => {
-    if (isLoop) {
-      playNext();
-    } else {
-      setIsPlaying(false);
-    }
   };
 
   const formatTime = (time: number) => {
@@ -165,12 +82,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                <button onClick={() => setShowPlaylist(false)} className="text-white/60 hover:text-white">✕</button>
            </div>
            <div className="space-y-2">
-               {PLAYLIST.map((song, index) => (
+               {playlist.map((song, index) => (
                    <div 
                         key={index}
                         onClick={() => {
                             setCurrentSongIndex(index);
-                            setIsPlaying(true);
                             setShowPlaylist(false);
                         }}
                         className={`p-3 rounded-lg flex items-center gap-3 cursor-pointer transition-colors ${currentSongIndex === index ? 'bg-red-900/50 border border-yellow-500/30' : 'hover:bg-white/10'}`}
@@ -280,7 +196,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <SkipBack size={26} fill="currentColor" />
             </button>
             <button 
-              onClick={togglePlay}
+              onClick={() => togglePlay()}
               className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,0,0.5)] border-2 border-yellow-500/50 hover:scale-105 active:scale-95 transition-all"
             >
               {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
@@ -308,14 +224,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           </button>
         </div>
       </div>
-
-      <audio 
-        ref={audioRef}
-        src={currentSong.url}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={handleEnded}
-      />
     </div>
   );
 };

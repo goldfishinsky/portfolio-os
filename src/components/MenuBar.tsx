@@ -6,6 +6,8 @@ import { useThemeStore } from '../store/themeStore';
 import { apps } from '../config/apps';
 import { userConfig } from '../config/userConfig';
 import { useAuthStore } from '../store/authStore';
+import { useMusicStore } from '../store/musicStore';
+import { Play, Pause, SkipBack, SkipForward, Music } from 'lucide-react';
 
 interface MenuBarProps {
   onChristmasToggle?: () => void;
@@ -33,7 +35,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   showChristmasControls,
   sceneProps 
 }) => {
-  const { activeWindowId, windows } = useOSStore();
+  const { activeWindowId, windows, openWindow } = useOSStore();
   const { isDarkMode, toggleTheme } = useThemeStore();
   const { user, initialize, signInWithGoogle, signOut } = useAuthStore();
   
@@ -160,10 +162,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           >
             {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
           </button>
-          <div className="h-4 w-[1px] bg-white/20 mx-1" />
-          <Battery size={18} />
-          <Wifi size={16} />
-          <Search size={16} />
+          {/* Music Widget */}
+          <MusicWidget />
+          
           {/* Christmas Controls Toggle */}
           {onChristmasToggle && sceneProps && (
             <div className="relative">
@@ -313,3 +314,65 @@ export const MenuBar: React.FC<MenuBarProps> = ({
     </div>
   );
 };
+
+const MusicWidget = () => {
+    const { 
+        playlist, 
+        currentSongIndex, 
+        isPlaying, 
+        togglePlay,
+        playNext,
+        playPrev
+    } = useMusicStore();
+    const { openWindow, windows } = useOSStore();
+
+    const currentSong = playlist[currentSongIndex];
+    if (!currentSong) return null;
+
+    // Check if music window is open
+    const musicAppRunning = windows.some(w => w.appId === 'music-player');
+    
+    // Show if playing or if app is running (minimized or open). 
+    // If user explicitly closed the app (red X) and music stopped, this hides.
+    if (!isPlaying && !musicAppRunning) return null;
+    
+    return (
+        <div className="flex items-center gap-2 bg-black/20 hover:bg-black/40 py-0.5 px-2 rounded-lg transition-colors border border-white/5 mr-2 animate-in fade-in duration-300">
+            <button 
+                onClick={() => {
+                   const win = windows.find(w => w.appId === 'music-player');
+                   if (win) {
+                       useOSStore.getState().focusWindow(win.id);
+                   } else {
+                       openWindow('music-player', 'Music');
+                   }
+                }}
+                className="flex items-center gap-2 max-w-[150px] overflow-hidden group"
+            >
+                <div className="flex items-center text-[11px] leading-tight text-left gap-1.5 px-1">
+                     <span className="font-medium text-white group-hover:text-yellow-400 transition-colors whitespace-nowrap">
+                        {currentSong.title}
+                     </span>
+                     <span className="text-white/40">-</span>
+                     <span className="text-white/60 whitespace-nowrap truncate max-w-[100px]">
+                        {currentSong.artist}
+                     </span>
+                </div>
+            </button>
+            
+            <div className="h-4 w-[1px] bg-white/10 mx-1" />
+            
+            <div className="flex items-center gap-1">
+                <button onClick={playPrev} className="hover:text-yellow-400 transition-colors cursor-pointer">
+                    <SkipBack size={14} fill="currentColor" />
+                </button>
+                <button onClick={() => togglePlay()} className="hover:text-yellow-400 transition-colors cursor-pointer">
+                    {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                </button>
+                <button onClick={playNext} className="hover:text-yellow-400 transition-colors cursor-pointer">
+                    <SkipForward size={14} fill="currentColor" />
+                </button>
+            </div>
+        </div>
+    );
+}

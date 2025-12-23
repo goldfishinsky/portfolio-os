@@ -25,6 +25,9 @@ export const Desktop: React.FC = () => {
   const [snowSpeed, setSnowSpeed] = useState(0.2); 
   const [isSnowing, setIsSnowing] = useState(true);
   const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
+  const [windX, setWindX] = useState(0);
+  const [turbulence, setTurbulence] = useState(0.5);
+  const [snowflakeSize, setSnowflakeSize] = useState(1.0);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -105,6 +108,9 @@ export const Desktop: React.FC = () => {
         snowSpeed={snowSpeed}
         isSnowing={isSnowing}
         sceneMode={sceneMode}
+        windX={windX}
+        turbulence={turbulence}
+        snowflakeSize={snowflakeSize}
       />
 
       {/* Overlay Layer */}
@@ -121,7 +127,10 @@ export const Desktop: React.FC = () => {
               isInteractive, setIsInteractive,
               snowSpeed, setSnowSpeed,
               isSnowing, setIsSnowing,
-              sceneMode, setSceneMode
+              sceneMode, setSceneMode,
+              windX, setWindX,
+              turbulence, setTurbulence,
+              snowflakeSize, setSnowflakeSize
             }}
           />
         </div>

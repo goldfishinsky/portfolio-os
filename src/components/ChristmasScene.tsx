@@ -65,7 +65,51 @@ const RealisticFoliage = () => {
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} receiveShadow position={[0, 0.5, 0]}>
       <coneGeometry args={[0.5, 1.5, 4]} />
-      <meshStandardMaterial roughness={0.8} metalness={0.1} />
+      <meshStandardMaterial 
+        roughness={0.8} 
+        metalness={0.1}
+        onBeforeCompile={(shader) => {
+          shader.vertexShader = `
+            varying vec3 vWorldNormal;
+            ${shader.vertexShader}
+          `.replace(
+            '#include <begin_vertex>',
+            `
+            #include <begin_vertex>
+            // Approximation: transform normal to view space (vNormal usage later)
+            // But for snow, we want World Space "Up".
+            // Since the camera moves, View Space "Up" changes.
+            // "World Up" (0,1,0) in View Space is (viewMatrix * vec4(0,1,0,0)).xyz
+            `
+          );
+          
+          shader.fragmentShader = `
+            ${shader.fragmentShader}
+          `.replace(
+            '#include <color_fragment>',
+            `
+            #include <color_fragment>
+            
+            // Calculate snow
+            // View Space Up Vector
+            vec3 viewUp = normalize(vec3(viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)));
+            
+            // vNormal is in View Space (standard material)
+            float snowFactor = dot(normalize(vNormal), viewUp);
+            
+            // Snow threshold - only top surfaces
+            // Smoothstep for soft edge
+            // Lower threshold (0.1) allows snow on steeper slopes, making it look "thicker"
+            float snowCoverage = smoothstep(0.1, 0.5, snowFactor);
+            
+            // Mix white snow color
+            // Use varying noise to make it less uniform? 
+            // For now, simple white mix
+            diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.95, 0.95, 1.0), snowCoverage * 0.9);
+            `
+          );
+        }}
+      />
     </instancedMesh>
   );
 };
@@ -334,82 +378,156 @@ const LightStrips = () => {
     </group>
   );
 };
-const Snow = ({ speed }: { speed: number }) => {
-  const count = 3000; // Increased count
+const Snow = ({ speed, windX, turbulence, size }: { speed: number, windX: number, turbulence: number, size: number }) => {
+  const count = 8000;
   
-  // Initial positions
-  const positions = useMemo(() => {
+  const { positions, randoms } = useMemo(() => {
     const pos = new Float32Array(count * 3);
+    const rnd = new Float32Array(count * 3); 
+    
     for (let i = 0; i < count; i++) {
-        // Spread snow over a wider area (100x100 instead of 25x25)
-      pos[i * 3] = (Math.random() - 0.5) * 100;     // x
-      pos[i * 3 + 1] = Math.random() * 20;         // y
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 100; // z
+      pos[i * 3] = (Math.random() - 0.5) * 120;
+      pos[i * 3 + 1] = Math.random() * 40; 
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 120;
+
+      rnd[i * 3] = Math.random();     
+      rnd[i * 3 + 1] = Math.random(); 
+      rnd[i * 3 + 2] = Math.random(); 
     }
-    return pos;
+    return { positions: pos, randoms: rnd };
   }, []);
 
-  // Random parameters for each flake (speed, size, drift offset)
-  const randoms = useMemo(() => {
-    const r = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      r[i * 3] = Math.random();     // speed multiplier
-      r[i * 3 + 1] = Math.random(); // size multiplier
-      r[i * 3 + 2] = Math.random(); // drift offset
-    }
-    return r;
-  }, []);
-
-  const shaderArgs = useMemo(() => ({
+const shaderArgs = useMemo(() => ({
     uniforms: {
       time: { value: 0 },
       globalSpeed: { value: speed },
+      windX: { value: windX },
+      turbulence: { value: turbulence },
+      sizeMultiplier: { value: size },
       color: { value: new THREE.Color('#ffffff') }
     },
     vertexShader: `
       uniform float time;
       uniform float globalSpeed;
+      uniform float windX;
+      uniform float turbulence;
+      uniform float sizeMultiplier;
+      
       attribute vec3 randoms;
+      
       varying float vAlpha;
+      varying float vRotation;
       
       void main() {
-        float speed = (1.0 + randoms.x * 2.0) * globalSpeed;
-        float size = randoms.y;
-        float driftOffset = randoms.z * 6.28;
+        float individualSpeed = (0.2 + randoms.x * 0.8) * globalSpeed; 
+        float individualSize = randoms.y;
         
         vec3 pos = position;
         
-        // Fall down
-        pos.y = position.y - mod(time * speed, 20.0);
-        if (pos.y < 0.0) pos.y += 20.0; // Wrap around
+        // 1. Gravity (Falling Down)
+        float fallDistance = time * individualSpeed * 5.0;
+        pos.y = mod(position.y - fallDistance, 40.0) - 10.0; // Range -10 to 30
         
-        // Drift
-        pos.x += sin(time * 0.5 + driftOffset) * 0.5;
-        pos.z += cos(time * 0.3 + driftOffset) * 0.5;
+        // 2. Wind
+        pos.x += windX * time * 5.0 * individualSpeed;
+        pos.x = mod(pos.x + 60.0, 120.0) - 60.0; 
         
+        // 3. Turbulence (Swaying)
+        float t = time * 0.5;
+        float swayOffset = randoms.z * 6.28;
+        
+        float swayX = sin(t + swayOffset + pos.y * 0.1) * 2.0; 
+        float swayZ = cos(t * 0.8 + swayOffset + pos.y * 0.1) * 2.0;
+        
+        pos.x += swayX * turbulence;
+        pos.z += position.z + swayZ * turbulence;
+
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         
-        // Size attenuation
-        gl_PointSize = (4.0 * size + 2.0) * (10.0 / -mvPosition.z);
+        // Size
+        float baseSize = (6.0 * individualSize + 4.0) * sizeMultiplier;
+        gl_PointSize = baseSize * (20.0 / -mvPosition.z);
         
-        // Fade out near bottom
-        vAlpha = smoothstep(0.0, 2.0, pos.y);
+        // Rotation (Tumbling)
+        // Spin speed depends on random factor
+        float spinSpeed = (randoms.z - 0.5) * 4.0; 
+        vRotation = time * spinSpeed + randoms.x * 6.28;
+        
+        // Fade boundary
+        float topFade = smoothstep(30.0, 25.0, pos.y);
+        float bottomFade = smoothstep(-10.0, -5.0, pos.y);
+        vAlpha = topFade * bottomFade;
       }
     `,
     fragmentShader: `
       uniform vec3 color;
       varying float vAlpha;
+      varying float vRotation;
       
+      const float PI = 3.14159265;
+
+      // Hexagonal fold
+      // Maps 2D position to a single sector (0 to 60 degrees) of a hexagon
+      // to exploit radial symmetry.
+      vec2 fold(vec2 p) {
+        float r = length(p);
+        float a = atan(p.y, p.x);
+        float segment = PI / 3.0; // 60 degrees
+        a = mod(a, segment) - segment * 0.5; // -30 to +30
+        return vec2(cos(a), sin(a)) * r;
+      }
+
       void main() {
-        // Soft circle shape
-        vec2 coord = gl_PointCoord - vec2(0.5);
-        float dist = length(coord);
-        
+        vec2 uv = gl_PointCoord - 0.5;
+        float dist = length(uv);
         if (dist > 0.5) discard;
         
-        float alpha = (0.5 - dist) * 2.0 * vAlpha;
-        gl_FragColor = vec4(color, alpha * 0.8);
+        // 1. Rotate the flake
+        float c = cos(vRotation);
+        float s = sin(vRotation);
+        vec2 p = vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
+        
+        // 2. Make it crisp and icy
+        // Use polar folding for 6-fold symmetry
+        vec2 folded = fold(p);
+        
+        // 3. Draw the dendritic shape
+        // We are now in a wedge.
+        // Let's create a main crystal definition.
+        
+        // Main beam thickness
+        // Coordinate 'folded.x' is distance along the 0-degree ray (center of wedge)
+        // Coordinate 'folded.y' is distance perpendicular to it
+        
+        float r = length(p);
+        
+        // Shape function:
+        // A main beam along x-axis (in folded space)
+        float beam = 1.0 - smoothstep(0.005, 0.025, abs(folded.y));
+        
+        // Branches
+        // "V" shapes coming off the main beam
+        // We can simulate this by checking distance to angled lines
+        float branchD = abs(folded.y - abs(folded.x - 0.2) * 1.5);
+        float branches = 1.0 - smoothstep(0.005, 0.025, branchD);
+        
+        // Combine
+        float shape = max(beam, branches);
+        
+        // Mask with a fading radius (so it doesn't look like infinite lines)
+        shape *= smoothstep(0.5, 0.3, r);
+        
+        // Soft Glow core
+        float core = exp(-r * 10.0);
+        
+        // Final mix
+        float alpha = max(shape, core);
+        
+        // Slight noise/sparkle could be added, but clean crystal is often better
+        alpha = clamp(alpha, 0.0, 1.0);
+        
+        gl_FragColor = vec4(color, alpha * vAlpha);
       }
     `,
     transparent: true,
@@ -421,6 +539,9 @@ const Snow = ({ speed }: { speed: number }) => {
     if (shaderArgs.uniforms) {
       shaderArgs.uniforms.time.value = state.clock.getElapsedTime();
       shaderArgs.uniforms.globalSpeed.value = speed;
+      shaderArgs.uniforms.windX.value = windX;
+      shaderArgs.uniforms.turbulence.value = turbulence;
+      shaderArgs.uniforms.sizeMultiplier.value = size;
     }
   });
 
@@ -633,13 +754,19 @@ interface ChristmasSceneProps {
     snowSpeed: number;
     isSnowing: boolean;
     sceneMode: 'night' | 'sunset';
+    windX: number;
+    turbulence: number;
+    snowflakeSize: number;
 }
 
 export const ChristmasScene: React.FC<ChristmasSceneProps> = ({ 
     isInteractive,
     snowSpeed,
     isSnowing,
-    sceneMode
+    sceneMode,
+    windX,
+    turbulence,
+    snowflakeSize
 }) => {
   const config = SCENE_CONFIGS[sceneMode];
 
@@ -703,7 +830,14 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
                 treeRadius={2.5}
               /> */}
               {/* Snow System (Conditional) */}
-              {isSnowing && <Snow speed={snowSpeed} />}
+              {isSnowing && (
+                <Snow 
+                    speed={snowSpeed} 
+                    windX={windX}
+                    turbulence={turbulence}
+                    size={snowflakeSize}
+                />
+              )}
               
               {/* New Constellations */}
               {config.starOpacity > 0.5 && <Constellations />}

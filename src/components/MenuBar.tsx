@@ -19,6 +19,12 @@ interface MenuBarProps {
     setIsSnowing: (val: boolean) => void;
     sceneMode: 'night' | 'sunset';
     setSceneMode: (val: 'night' | 'sunset') => void;
+    windX: number;
+    setWindX: (val: number) => void;
+    turbulence: number;
+    setTurbulence: (val: number) => void;
+    snowflakeSize: number;
+    setSnowflakeSize: (val: number) => void;
   };
 }
 
@@ -230,6 +236,57 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                                 step="0.1" 
                                 value={sceneProps.snowSpeed} 
                                 onChange={(e) => sceneProps.setSnowSpeed(parseFloat(e.target.value))}
+                                className="w-full accent-white h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+
+                        {/* Wind Control */}
+                        <div className="flex flex-col gap-2">
+                             <div className="flex justify-between text-xs text-gray-300">
+                                <span>Wind (Drift)</span>
+                                <span>{sceneProps.windX.toFixed(1)}</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="-2" 
+                                max="2" 
+                                step="0.1" 
+                                value={sceneProps.windX} 
+                                onChange={(e) => sceneProps.setWindX(parseFloat(e.target.value))}
+                                className="w-full accent-white h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+
+                        {/* Turbulence Control */}
+                         <div className="flex flex-col gap-2">
+                             <div className="flex justify-between text-xs text-gray-300">
+                                <span>Turbulence</span>
+                                <span>{sceneProps.turbulence.toFixed(1)}</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="2" 
+                                step="0.1" 
+                                value={sceneProps.turbulence} 
+                                onChange={(e) => sceneProps.setTurbulence(parseFloat(e.target.value))}
+                                className="w-full accent-white h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+
+                         {/* Size Control */}
+                         <div className="flex flex-col gap-2">
+                             <div className="flex justify-between text-xs text-gray-300">
+                                <span>Flake Size</span>
+                                <span>{sceneProps.snowflakeSize.toFixed(1)}</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="0.2" 
+                                max="3.0" 
+                                step="0.1" 
+                                value={sceneProps.snowflakeSize} 
+                                onChange={(e) => sceneProps.setSnowflakeSize(parseFloat(e.target.value))}
                                 className="w-full accent-white h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
                             />
                         </div>

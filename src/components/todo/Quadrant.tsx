@@ -18,9 +18,10 @@ export const Quadrant: React.FC<QuadrantProps> = ({
   headerBgClass, 
   containerBgClass,
 }) => {
-  const { todos, filter, addTodo } = useTodoStore();
+  const { todos, filter, addTodo, updateTodoQuadrant } = useTodoStore();
   const [newTaskTitle, setNewTaskTitle] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
+  const [isDraggingOver, setIsDraggingOver] = React.useState(false);
 
   const filteredTodos = todos.filter((t) => {
     if (t.quadrant !== quadrant) return false;
@@ -64,8 +65,35 @@ export const Quadrant: React.FC<QuadrantProps> = ({
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDraggingOver(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const todoId = e.dataTransfer.getData('todoId');
+    if (todoId) {
+      await updateTodoQuadrant(todoId, quadrant);
+    }
+  };
+
   return (
-    <div className={`flex flex-col h-full ${containerBgClass} backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl transition-all hover:border-white/20 ring-1 ring-white/5`}>
+    <div 
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`flex flex-col h-full ${containerBgClass} backdrop-blur-2xl rounded-2xl border transition-all overflow-hidden shadow-2xl relative
+        ${isDraggingOver ? 'border-white/40 ring-2 ring-white/20 bg-white/10' : 'border-white/10 hover:border-white/20 ring-1 ring-white/5'}
+      `}
+    >
       <div className={`px-4 py-3 border-b border-white/5 flex justify-between items-center ${headerBgClass} backdrop-blur-md`}>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${dotColorClass} shadow-[0_0_8px_rgba(255,255,255,0.3)]`} />

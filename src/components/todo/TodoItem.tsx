@@ -29,7 +29,14 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   };
 
   return (
-    <div className="group flex items-start gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/5 hover:border-white/10 mb-2 backdrop-blur-sm relative">
+    <div 
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('todoId', todo.id);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      className="group flex items-start gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/5 hover:border-white/10 mb-2 backdrop-blur-sm relative cursor-grab active:cursor-grabbing"
+    >
       <button
         onClick={() => toggleTodo(todo.id, !todo.is_completed)}
         className={`mt-1 flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${

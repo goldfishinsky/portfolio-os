@@ -299,7 +299,274 @@ const Ground = () => {
     );
 };
 
-// ... (Keep other components as is)
+
+const SunsetEnvironment = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  const shaderArgs = useMemo(() => ({
+    uniforms: {
+      uTime: { value: 0 },
+      iResolution: { value: new THREE.Vector2(1000, 1000) },
+      uMouse: { value: new THREE.Vector2(0.5, 0.5) }, // Add mouse uniform if needed for interaction
+    },
+    vertexShader: `
+      varying vec3 vWorldPosition;
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPosition.xyz;
+        gl_Position = projectionMatrix * viewMatrix * worldPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec2 iResolution;
+      uniform vec2 uMouse;
+      
+      varying vec3 vWorldPosition;
+
+      // --- Ported Shadertoy Code: "The sun, the sky and the clouds" ---
+      // Original by StillTravelling: https://www.shadertoy.com/view/tdSXzD
+      
+      #define t uTime
+      #define fov tan(radians(60.0))
+      #define S(x, y, z) smoothstep(x, y, z)
+      #define cameraheight 5e1 
+      // Adjusted constants for look
+      #define mincloudheight 5e3 
+      #define maxcloudheight 8e3 
+      #define xaxiscloud t*5e2 
+      #define yaxiscloud 0. 
+      #define zaxiscloud t*6e2 
+      #define cloudnoise 2e-4 
+
+      // Constants
+      const int steps = 16; 
+      const int stepss = 16; 
+      const float R0 = 6360e3; 
+      const float Ra = 6380e3; 
+      const float I = 10.; 
+      const float SI = 5.; 
+      const float g = 0.45; 
+      const float g2 = g * g;
+      const float ts = (cameraheight / 2.5e5);
+      const float s = 0.999; 
+      const float s2 = s * s;
+      const float Hr = 8e3; 
+      const float Hm = 1.2e3; 
+
+      vec3 bM = vec3(21e-6); 
+      vec3 bR = vec3(5.8e-6, 13.5e-6, 33.1e-6); 
+      vec3 C = vec3(0., -R0, 0.); 
+      vec3 Ds = normalize(vec3(0., 0.0, -1.)); // Default sun direction
+
+      // --- Noise Replacement (Procedural) ---
+      // Replacing iChannel0 texture lookups with procedural value noise
+      
+      float hash(float n) { return fract(sin(n) * 43758.5453123); }
+      
+      // 3D Noise function (IQ style)
+      float noise(vec3 x) {
+          vec3 p = floor(x);
+          vec3 f = fract(x);
+          f = f * f * (3.0 - 2.0 * f);
+          float n = p.x + p.y * 57.0 + 113.0 * p.z;
+          return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+                         mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+                     mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+                         mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
+      }
+      
+      // 2D Noise
+      float noise(vec2 x) {
+          vec2 p = floor(x);
+          vec2 f = fract(x);
+          f = f * f * (3.0 - 2.0 * f);
+          float n = p.x + p.y * 57.0;
+          return mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+                     mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
+      }
+
+      float fnoise(vec3 p, in float t) {
+        p *= .25;
+        float f;
+        f = 0.5000 * noise(p); p = p * 3.02; p.y -= t*.1; 
+        f += 0.2500 * noise(p); p = p * 3.03; p.y += t*.06;
+        f += 0.1250 * noise(p); p = p * 3.01;
+        f += 0.0625   * noise(p); 
+        return f;
+      }
+
+      float cloud(vec3 p, in float t) {
+        float cloudy = 0.5; // Cloud density
+        float cld = fnoise(p * cloudnoise, t) + cloudy * 0.1;
+        cld = smoothstep(.4 + .04, .6 + .04, cld);
+        cld *= cld * 5.0;
+        return cld + 0.01 * (cloudy * 20.); // haze
+      }
+
+      void densities(in vec3 pos, out float rayleigh, out float mie) {
+        float h = length(pos - C) - R0;
+        rayleigh = exp(-h / Hr);
+        vec3 d = pos;
+        d.y = 0.0;
+        float dist = length(d);
+
+        float cld = 0.;
+        if (mincloudheight < h && h < maxcloudheight) {
+            cld = cloud(pos + vec3(xaxiscloud, yaxiscloud, zaxiscloud), t) * 0.5;
+            cld *= sin(3.1415 * (h - mincloudheight) / (maxcloudheight - mincloudheight)) * 0.5;
+        }
+        
+        mie = exp(-h / Hm) + cld + 0.002; // Base haze
+      }
+
+      float escape(in vec3 p, in vec3 d, in float R) {
+        vec3 v = p - C;
+        float b = dot(v, d);
+        float c = dot(v, v) - R * R;
+        float det2 = b * b - c;
+        if (det2 < 0.) return -1.;
+        float det = sqrt(det2);
+        float t1 = -b - det, t2 = -b + det;
+        return (t1 >= 0.) ? t1 : t2;
+      }
+
+      void scatter(vec3 o, vec3 d, out vec3 col, out vec3 scat, in float t) {
+        float L = escape(o, d, Ra);
+        float mu = dot(d, Ds);
+        float opmu2 = 1. + mu * mu;
+        float phaseR = .0596831 * opmu2;
+        float phaseM = .1193662 * (1. - g2) * opmu2 / ((2. + g2) * pow(1. + g2 - 2. * g * mu, 1.5));
+        float phaseS = .1193662 * (1. - s2) * opmu2 / ((2. + s2) * pow(1. + s2 - 2. * s * mu, 1.5));
+
+        float depthR = 0., depthM = 0.;
+        vec3 R = vec3(0.), M = vec3(0.);
+        float dl = L / float(steps);
+
+        for (int i = 0; i < steps; ++i) {
+            float l = float(i) * dl;
+            vec3 p = (o + d * l);
+
+            float dR, dM;
+            densities(p, dR, dM);
+            dR *= dl; dM *= dl;
+            depthR += dR;
+            depthM += dM;
+
+            float Ls = escape(p, Ds, Ra);
+            if (Ls > 0.) {
+                float dls = Ls / float(stepss);
+                float depthRs = 0., depthMs = 0.;
+                for (int j = 0; j < stepss; ++j) {
+                    float ls = float(j) * dls;
+                    vec3 ps = (p + Ds * ls);
+                    float dRs, dMs;
+                    densities(ps, dRs, dMs);
+                    depthRs += dRs * dls;
+                    depthMs += dMs * dls;
+                }
+
+                vec3 A = exp(-(bR * (depthRs + depthR) + bM * (depthMs + depthM)));
+                R += (A * dR);
+                M += A * dM;
+            }
+        }
+
+        col = (I) * (M * bM * (phaseM)); // Mie
+        col += (I) * (R * bR * phaseR); // Rayleigh
+        col += (SI) * (M * bM * phaseS); // Sun halo
+        scat = 0.1 * (bM * depthM);
+      }
+
+      vec3 hash33(vec3 p) {
+          p = fract(p * vec3(443.8975, 397.2973, 491.1871));
+          p += dot(p.zxy, p.yxz + 19.27);
+          return fract(vec3(p.x * p.y, p.z * p.x, p.y * p.z));
+      }
+
+      vec3 stars(in vec3 p) {
+        vec3 c = vec3(0.);
+        float res = 1000.0 * 2.5; 
+        for (float i = 0.; i < 3.; i++) { // Reduced iterations for perf
+            vec3 q = fract(p * (.15 * res)) - 0.5;
+            vec3 id = floor(p * (.15 * res));
+            vec2 rn = hash33(id).xy;
+            float c2 = 1. - smoothstep(0., .6, length(q));
+            c2 *= step(rn.x, .0005 + i * i * 0.001);
+            c += c2 * (mix(vec3(1.0, 0.49, 0.1), vec3(0.75, 0.9, 1.), rn.y) * 0.1 + 0.9);
+            p *= 1.3;
+        }
+        return c * c * 0.8;
+      }
+
+      void main() {
+        // Defines
+        Ds = normalize(vec3(0.0, 0.05, -1.0)); // Fixed Sunset Direction
+
+        vec3 O = vec3(0., cameraheight, 0.);
+        vec3 D = normalize(vWorldPosition - cameraPosition);
+
+        vec3 color = vec3(0.);
+        vec3 scat = vec3(0.);
+        float att = 1.;
+        float staratt = 1.;
+        float scatatt = 1.;
+        vec3 star = vec3(0.);
+
+        if (D.y < -ts) {
+            // Water reflection case
+            float L = -O.y / D.y;
+            O = O + D * L;
+            D.y = -D.y;
+            // Simple water turbulence
+            D = normalize(D + vec3(0, .003 * sin(t + 6.28 * noise(O.xz * 0.01 - t * 0.5)), 0.));
+            
+            att = 0.6; // Water absorption
+            star = stars(D);
+        } else {
+            // Sky case
+            star = stars(D);
+        }
+
+        // Star visibility based on day/night (simplified)
+        // With bright sunset, stars are mostly hidden
+        staratt = 0.1; 
+
+        star *= att * staratt;
+
+        scatter(O, D, color, scat, t);
+        
+        color *= att;
+        scat *= att;
+        scat *= scatatt;
+        
+        color += scat;
+        color += star;
+        
+        // Final Tone Mapping & Gamma
+        gl_FragColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+      }
+    `,
+    side: THREE.BackSide 
+  }), []);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+        const mat = meshRef.current.material as THREE.ShaderMaterial;
+        mat.uniforms.uTime.value = state.clock.getElapsedTime();
+    }
+  });
+
+  return (
+    <mesh ref={meshRef}>
+      {/* Huge Sphere wrapping the world */}
+      <sphereGeometry args={[500, 32, 32]} /> 
+      <shaderMaterial args={[shaderArgs]} side={THREE.BackSide} />
+    </mesh>
+  );
+};
+    
+
 
 const Gifts = () => {
   const gifts = useMemo(() => {
@@ -736,14 +1003,14 @@ export const SCENE_CONFIGS = {
     fogColor: '#4a2b38',
     fogNear: 20,
     fogFar: 150, 
-    ambientIntensity: 0.2,
-    sunPosition: [0, 5, -300] as [number, number, number],
-    sunColor: '#ff6622',
-    sunIntensity: 2.5,
+    ambientIntensity: 0.4, // Increased ambient for softer shadows
+    sunPosition: [0, 2, -300] as [number, number, number],
+    sunColor: '#ff9933', // Softer golden orange
+    sunIntensity: 0.8, // Reduced from 2.5
     fillLightColor: '#ff8844',
     starOpacity: 0.3,
-    bloomThreshold: 0.8,
-    bloomIntensity: 2.0,
+    bloomThreshold: 0.9, // Higher threshold to bloom only brightest parts
+    bloomIntensity: 1.0, // Reduced bloom
     celestialBody: 'sun' as const,
     moonGlow: 0 // Moon visible but no light
   }
@@ -782,12 +1049,13 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
         performance={{ min: 0.5 }}
         camera={{ position: [0, 2, 18], fov: 45 }}
       >
-        <fog attach="fog" args={[config.fogColor, config.fogNear, config.fogFar]} />
+        {/* Only use Fog if NOT sunset (shader handles atmosphere) */}
+        {sceneMode !== 'sunset' && (
+             <fog attach="fog" args={[config.fogColor, config.fogNear, config.fogFar]} />
+        )}
         
-        {/* Lighting Setup for "Warm & Moonlit" look */}
+        {/* Lighting Setup */}
         <ambientLight intensity={config.ambientIntensity} />
-        
-        {/* Moonlight (Cool Blue) */}
         <directionalLight 
           position={config.sunPosition} 
           intensity={config.sunIntensity} 
@@ -796,11 +1064,8 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
           shadow-bias={-0.0001}
           shadow-mapSize={[512, 512]}
         />
-        
-        {/* Warm Fill from Tree Lights */}
         <pointLight position={[2, 4, 2]} intensity={1} color={config.fillLightColor} distance={10} />
         <pointLight position={[-2, 2, 3]} intensity={1} color={config.fillLightColor} distance={10} />
-        {/* Central Tree Glow (compensating for removed individual lights) */}
         <pointLight position={[0, 3, 0]} intensity={2} color="#ffaa00" distance={8} decay={2} />
 
         <Suspense fallback={null}>
@@ -810,17 +1075,17 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
               <FairyLights />
               <Ornaments />
               
-              {/* Celestial Body */}
-              {/* Celestial Body */}
-              {config.celestialBody === 'moon' ? (
+              {config.celestialBody === 'moon' && sceneMode !== 'sunset' ? (
                 <Moon intensity={config.moonGlow} />
-              ) : (
-                <group position={config.sunPosition}>
-                   <Sun />
-                </group>
-              )}
+              ) : null}
 
-              <Ground />
+              {/* Ground or Sunset Environment */}
+              {sceneMode === 'sunset' ? (
+                 <SunsetEnvironment />
+              ) : (
+                 <Ground />
+              )}
+              
               <Gifts />
               <LightStrips />
 {/* <Monkey 
@@ -830,7 +1095,7 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
                 treeRadius={2.5}
               /> */}
               {/* Snow System (Conditional) */}
-              {isSnowing && (
+              {isSnowing && sceneMode !== 'sunset' && (
                 <Snow 
                     speed={snowSpeed} 
                     windX={windX}
@@ -839,12 +1104,12 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
                 />
               )}
               
-              {/* New Constellations */}
-              {config.starOpacity > 0.5 && <Constellations />}
+              {/* Stars - Only in Night Mode */}
+              {sceneMode !== 'sunset' && config.starOpacity > 0.5 && <Constellations />}
           </group>
         </Suspense>
 
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />
+        {sceneMode !== 'sunset' && <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />}
         
         <OrbitControls 
             enableZoom={isInteractive} 

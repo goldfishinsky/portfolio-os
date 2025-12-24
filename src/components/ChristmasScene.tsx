@@ -354,8 +354,8 @@ const SunsetEnvironment = () => {
       const float Hr = 8e3; 
       const float Hm = 1.2e3; 
 
-      vec3 bM = vec3(21e-6); 
-      vec3 bR = vec3(5.8e-6, 13.5e-6, 33.1e-6); 
+      vec3 bM = vec3(21e-6, 16e-6, 10e-6); // Tinted Mie for reddish clouds
+      vec3 bR = vec3(5.8e-6, 18.5e-6, 40.1e-6); // Increased Green/Blue scattering for redder sky 
       vec3 C = vec3(0., -R0, 0.); 
       vec3 Ds = normalize(vec3(0., 0.0, -1.)); // Default sun direction
 
@@ -475,6 +475,13 @@ const SunsetEnvironment = () => {
         col = (I) * (M * bM * (phaseM)); // Mie
         col += (I) * (R * bR * phaseR); // Rayleigh
         col += (SI) * (M * bM * phaseS); // Sun halo
+        
+        // Artificial Red Boost for "Sunset Unique Red"
+        // Blend everything towards a deep orange/red based on how low the sun is (Ds.y)
+        // Since Ds is fixed at 0.05, we just apply it constantly or mix it.
+        // Let's boost the red channel and slightly cut blue in the final accumulation
+        col *= vec3(1.1, 0.9, 0.8); 
+        
         scat = 0.1 * (bM * depthM);
       }
 

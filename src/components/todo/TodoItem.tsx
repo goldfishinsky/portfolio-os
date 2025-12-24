@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Trash2, Check, Pencil } from 'lucide-react';
 import { type Todo, useTodoStore } from '../../store/todoStore';
 import { format } from 'date-fns';
@@ -29,13 +30,20 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   };
 
   return (
-    <div 
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
       draggable
       onDragStart={(e) => {
-        e.dataTransfer.setData('todoId', todo.id);
-        e.dataTransfer.effectAllowed = 'move';
+        // Cast to any to access dataTransfer properties that don't exist on Framer Motion's event type
+        const event = e as any;
+        event.dataTransfer.setData('todoId', todo.id);
+        event.dataTransfer.effectAllowed = 'move';
       }}
-      className="group flex items-start gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/5 hover:border-white/10 mb-2 backdrop-blur-sm relative cursor-grab active:cursor-grabbing"
+      className="group flex items-start gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5 hover:border-white/10 mb-2 backdrop-blur-sm relative cursor-grab active:cursor-grabbing"
     >
       <button
         onClick={() => toggleTodo(todo.id, !todo.is_completed)}
@@ -99,6 +107,6 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
           <Trash2 size={14} />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTodoStore } from '../../store/todoStore';
 import { TodoItem } from './TodoItem';
 import { Plus } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface QuadrantProps {
   quadrant: 1 | 2 | 3 | 4;
@@ -39,7 +40,15 @@ export const Quadrant: React.FC<QuadrantProps> = ({
     if (filter === 'month' && diffDays > 30) return false;
     if (filter === 'year' && diffDays > 365) return false;
     
+    
     return true;
+  }).sort((a, b) => {
+    // Sort by completion status (uncompleted first)
+    if (a.is_completed !== b.is_completed) {
+      return a.is_completed ? 1 : -1;
+    }
+    // Sort by creation date (newest first)
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   const handleSave = async () => {
@@ -131,9 +140,11 @@ export const Quadrant: React.FC<QuadrantProps> = ({
             <p>No tasks</p>
           </div>
         ) : (
-          filteredTodos.map((todo) => (
-            <TodoItem key={todo.id} todo={todo} />
-          ))
+          <AnimatePresence mode='popLayout'>
+            {filteredTodos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} />
+            ))}
+          </AnimatePresence>
         )}
       </div>
     </div>

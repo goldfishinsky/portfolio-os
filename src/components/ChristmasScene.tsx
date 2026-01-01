@@ -2,15 +2,81 @@
 
 import React, { useMemo, useRef, useState, useLayoutEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text, Line } from '@react-three/drei';
+import { OrbitControls, Stars, Sparkles, Float, Environment, SoftShadows, useTexture, Text, Line, Text3D, Center } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
 import * as THREE from 'three';
-// import { Monkey } from './Monkey';
+import { Monkey } from './Monkey';
 
 // --- Utils ---
 const randomRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
 // --- Components ---
+
+const NewYearObj = () => {
+  return (
+    <group position={[6, 0.5, 6]} rotation={[0, -0.6, 0]}>
+       <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5} floatingRange={[0, 0.2]}>
+        <Center top left>
+            <Text3D 
+                font="/fonts/helvetiker_bold.typeface.json" 
+                size={0.8} 
+                height={0.2} 
+                curveSegments={12}
+                bevelEnabled
+                bevelThickness={0.05}
+                bevelSize={0.03}
+                bevelOffset={0}
+                bevelSegments={5}
+            >
+                2026
+                <meshStandardMaterial 
+                    color="#ffd700" 
+                    roughness={0.1} 
+                    metalness={0.8} 
+                    emissive="#ffaa00"
+                    emissiveIntensity={0.2}
+                />
+            </Text3D>
+        </Center>
+       </Float>
+       
+       <group position={[0.5, -0.3, 1.5]}>
+         <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.5} floatingRange={[0, 0.1]}>
+            <Text3D 
+                font="/fonts/helvetiker_bold.typeface.json" 
+                size={0.35} 
+                height={0.05} 
+                curveSegments={12}
+                bevelEnabled
+                bevelThickness={0.01}
+                bevelSize={0.01}
+                bevelOffset={0}
+                bevelSegments={5}
+            >
+                HAPPY NEW YEAR
+                <meshStandardMaterial 
+                    color="#D32F2F" 
+                    roughness={0.2} 
+                    metalness={0.5}
+                />
+            </Text3D>
+         </Float>
+       </group>
+
+       {/* Spotlights to highlight the text */}
+       <spotLight 
+            position={[5, 5, 5]} 
+            angle={0.5} 
+            penumbra={1} 
+            intensity={2} 
+            color="#ffd700" 
+            castShadow 
+            target-position={[0, 0, 0]}
+        />
+    </group>
+  );
+};
+
 
 const RealisticFoliage = () => {
   // Optimized count for background wallpaper performance
@@ -1095,12 +1161,12 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
               
               <Gifts />
               <LightStrips />
-{/* <Monkey 
+              <Monkey 
                 position={[2, 0, 2]} 
                 scale={[0.5, 0.5, 0.5]} 
                 treeHeight={7}
                 treeRadius={2.5}
-              /> */}
+              />
               {/* Snow System (Conditional) */}
               {isSnowing && sceneMode !== 'sunset' && (
                 <Snow 
@@ -1113,8 +1179,13 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
               
               {/* Stars - Only in Night Mode */}
               {sceneMode !== 'sunset' && config.starOpacity > 0.5 && <Constellations />}
+
+              {/* New Year 3D Text Object */}
+              <NewYearObj />
+
           </group>
         </Suspense>
+
 
         {sceneMode !== 'sunset' && <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={0.5} />}
         

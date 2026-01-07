@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Music, Grid, List, Filter, Keyboard } from 'lucide-react';
+import { Music, Grid, List, Filter, Keyboard, Activity } from 'lucide-react';
+import { Metronome } from '../components/music/Metronome';
 import { Piano } from '../components/music/Piano';
 
 // --- Data Structures ---
@@ -407,7 +408,8 @@ const ChordCard = ({ chord }: { chord: Chord }) => {
 };
 
 export const Guitar = () => {
-  const [activeTab, setActiveTab] = useState<'chords' | 'scales' | 'fretboard' | 'keyboard'>('chords');
+  const [activeTab, setActiveTab] = useState<'chords' | 'scales' | 'fretboard' | 'keyboard' | 'metronome'>('chords');
+  // showMetronome state removed as it is now a tab
   
   // Scale State
   const [root, setRoot] = useState('C');
@@ -446,6 +448,7 @@ export const Guitar = () => {
                 { id: 'scales', label: 'Scales', icon: List },
                 { id: 'fretboard', label: 'Fretboard', icon: Music },
                 { id: 'keyboard', label: 'Keyboard', icon: Keyboard },
+                { id: 'metronome', label: 'Metronome', icon: Activity },
             ].map((tab) => (
                 <button
                     key={tab.id}
@@ -584,7 +587,15 @@ export const Guitar = () => {
                 <p className="mt-8 text-gray-500 text-sm">Use your computer keyboard to play (A-K, W-U)</p>
             </div>
         )}
+        
+        {/* Metronome Tab - Always rendered but hidden when inactive to preserve audio state */}
+        <div className={activeTab === 'metronome' ? 'h-full block' : 'hidden'}>
+            <Metronome isVisible={activeTab === 'metronome'} />
+        </div>
+
       </div>
+
+      {/* Overlays removed */}
     </div>
   );
 };

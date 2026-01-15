@@ -59,8 +59,22 @@ export const Taskbar: React.FC<TaskbarProps> = ({ apps }) => {
 function DockItem({ app, mouseX, onClick, isOpen }: { app: AppConfig; mouseX: any; onClick: () => void; isOpen: boolean }) {
   const ref = useRef<HTMLButtonElement>(null);
 
+  const boundsRef = useRef<{ x: number; width: number }>({ x: 0, width: 0 });
+
+  React.useEffect(() => {
+    const updateBounds = () => {
+      if (ref.current) {
+        boundsRef.current = ref.current.getBoundingClientRect();
+      }
+    };
+
+    updateBounds();
+    window.addEventListener('resize', updateBounds);
+    return () => window.removeEventListener('resize', updateBounds);
+  }, []);
+
   const distance = useTransform(mouseX, (val: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    const bounds = boundsRef.current;
     return val - bounds.x - bounds.width / 2;
   });
 
@@ -77,7 +91,7 @@ function DockItem({ app, mouseX, onClick, isOpen }: { app: AppConfig; mouseX: an
       ref={ref}
       style={{ scale, y }}
       onClick={onClick}
-      className="relative w-14 h-14 rounded-2xl flex items-center justify-center group transition-colors"
+      className="relative w-14 h-14 rounded-2xl flex items-center justify-center group transition-colors will-change-transform"
     >
       <div className="w-full h-full p-0.5 drop-shadow-xl">
         {app.icon}

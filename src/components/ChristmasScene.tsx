@@ -1143,10 +1143,14 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
 
         <Suspense fallback={null}>
           <group position={[0, -1, 0]}>
-              <Trunk />
-              <RealisticFoliage />
-              <FairyLights />
-              <Ornaments />
+              {sceneMode !== 'sunset' && (
+                <>
+                  <Trunk />
+                  <RealisticFoliage />
+                  <FairyLights />
+                  <Ornaments />
+                </>
+              )}
               
               {config.celestialBody === 'moon' && sceneMode !== 'sunset' ? (
                 <Moon intensity={config.moonGlow} />
@@ -1159,14 +1163,18 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
                  <Ground />
               )}
               
-              <Gifts />
-              <LightStrips />
-              <Monkey 
+               {sceneMode !== 'sunset' && (
+                  <>
+                    <Gifts />
+                    <LightStrips />
+                  </>
+               )}
+               {/* <Monkey 
                 position={[2, 0, 2]} 
                 scale={[0.5, 0.5, 0.5]} 
                 treeHeight={7}
                 treeRadius={2.5}
-              />
+              /> */}
               {/* Snow System (Conditional) */}
               {isSnowing && sceneMode !== 'sunset' && (
                 <Snow 
@@ -1180,8 +1188,8 @@ export const ChristmasScene: React.FC<ChristmasSceneProps> = ({
               {/* Stars - Only in Night Mode */}
               {sceneMode !== 'sunset' && config.starOpacity > 0.5 && <Constellations />}
 
-              {/* New Year 3D Text Object */}
-              <NewYearObj />
+              {/* New Year 3D Text Object - Hide in Sunset Mode */}
+              {sceneMode !== 'sunset' && <NewYearObj />}
 
           </group>
         </Suspense>

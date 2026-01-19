@@ -25,7 +25,7 @@ export const Desktop: React.FC = () => {
   const [isInteractive, setIsInteractive] = useState(true);
   const [snowSpeed, setSnowSpeed] = useState(0.2); 
   const [isSnowing, setIsSnowing] = useState(true);
-  const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('night');
+  const [sceneMode, setSceneMode] = useState<'night' | 'sunset'>('sunset');
   const [windX, setWindX] = useState(0);
   const [turbulence, setTurbulence] = useState(0.5);
   const [snowflakeSize, setSnowflakeSize] = useState(1.0);

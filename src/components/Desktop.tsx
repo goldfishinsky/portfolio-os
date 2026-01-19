@@ -163,13 +163,7 @@ export const Desktop: React.FC = () => {
                 <div className="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg border border-white/20 relative overflow-visible">
                     <Music size={32} className="text-white drop-shadow-md" stroke="#ffd700" />
-                    {/* Tiny hat on desktop icon */}
-                    <div className="absolute -top-1 -right-1 rotate-12 scale-50">
-                      <div className="w-6 h-4 bg-red-500 rounded-t-full relative">
-                        <div className="absolute -bottom-1 -left-1 w-8 h-2 bg-white rounded-full" />
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full" />
-                      </div>
-                    </div>
+
                   </div>
                 </div>
               ) : (

@@ -15,17 +15,7 @@ export const fileSystem: FileSystemItem = {
           type: 'folder',
           children: {}
         },
-        '小屋.mp3': { 
-          name: '小屋.mp3', 
-          type: 'file', 
-          icon: 'music',
-          metadata: { 
-            appId: 'music-player', 
-            url: 'https://owhqrvhsxmpmrecxavug.supabase.co/storage/v1/object/sign/like/little%20room_zhaolei.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGRmNGI3Yi0zZDg2LTQ0NGEtYTliNC01NGNkNzc5OGRkMzUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJsaWtlL2xpdHRsZSByb29tX3poYW9sZWkubXAzIiwiaWF0IjoxNzY2MDkzNDAxLCJleHAiOjE3OTc2Mjk0MDF9.9Jj5kY_I4Kki5pZ5X1zLuzfdjrwCJQyrt-e_jJwowmU',
-            title: '小屋',
-            artist: '赵雷'
-          } 
-        },
+
       }
     },
     'Documents': {

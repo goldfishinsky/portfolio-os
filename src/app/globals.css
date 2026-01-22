@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -8,6 +9,7 @@
   --color-taskbar-bg: rgba(243, 243, 243, 0.85);
   --color-accent: #0078d4;
   --backdrop-blur-xs: 2px;
+  --font-handwriting: 'Caveat', cursive; 
 }
 
 @layer base {

@@ -237,3 +237,19 @@ export const MusicFileIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const MoodBoardIcon = () => (
+  <IconContainer className="bg-[#fcf8f2] flex items-center justify-center">
+    <div className="relative w-full h-full p-2 flex flex-col gap-1 overflow-hidden">
+        {/* Polaroids */}
+        <div className="absolute top-2 left-2 w-8 h-10 bg-white shadow-sm rotate-[-6deg] p-0.5 border border-stone-200">
+           <div className="w-full h-7 bg-stone-300"/>
+        </div>
+        <div className="absolute top-4 right-2 w-8 h-10 bg-white shadow-sm rotate-[12deg] p-0.5 border border-stone-200 z-10">
+           <div className="w-full h-7 bg-amber-200"/>
+        </div>
+        {/* Washi Tape */}
+        <div className="absolute top-3 right-1 w-6 h-2 bg-red-400/80 rotate-[30deg] z-20 mix-blend-multiply" />
+    </div>
+  </IconContainer>
+);

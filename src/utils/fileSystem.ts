@@ -15,6 +15,7 @@ export const fileSystem: FileSystemItem = {
           type: 'folder',
           children: {}
         },
+        'MoodBoard': { name: 'MoodBoard', type: 'file', metadata: { appId: 'mood-board' }, icon: 'mood-board' },
 
       }
     },

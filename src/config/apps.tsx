@@ -12,6 +12,8 @@ import { Resume } from '../apps/Resume';
 import { FeedReader } from '../apps/FeedReader';
 import { Guitar } from '../apps/Guitar';
 import { MusicPlayer } from '../apps/MusicPlayer';
+import { MoodBoardApp } from '../apps/MoodBoard/MoodBoardApp';
+
 
 import videoPlayerIcon from '../assets/icons/video-player.png';
 import finderMorandiIcon from '../assets/icons/finder-morandi.png';
@@ -31,7 +33,8 @@ import {
   PreviewIcon,
   FeedIcon,
   GuitarIcon,
-  MusicFileIcon
+  MusicFileIcon,
+  MoodBoardIcon
 } from '../components/AppIcons';
 
 export const apps: Record<string, AppConfig> = {
@@ -73,30 +76,8 @@ export const apps: Record<string, AppConfig> = {
     width: 800,
     height: 600,
   },
-  terminal: {
-    id: 'terminal',
-    title: 'Terminal',
-    icon: <TerminalIcon />,
-    component: Terminal,
-    width: 600,
-    height: 400,
-  },
-  calculator: {
-    id: 'calculator',
-    title: 'Calculator',
-    icon: <CalculatorIcon />,
-    component: Calculator,
-    width: 320,
-    height: 450,
-  },
-  trash: {
-    id: 'trash',
-    title: 'Trash',
-    icon: <TrashIcon />,
-    component: Notepad, // Placeholder
-    width: 600,
-    height: 400,
-  },
+
+
   blog: {
     id: 'blog',
     title: 'Blog',
@@ -121,14 +102,7 @@ export const apps: Record<string, AppConfig> = {
     width: 1000,
     height: 700,
   },
-  resume: {
-    id: 'resume',
-    title: 'Resume',
-    icon: <PreviewIcon />,
-    component: Resume,
-    width: 800,
-    height: 1000,
-  },
+
   feed: {
     id: 'feed',
     title: 'Feed',
@@ -153,6 +127,15 @@ export const apps: Record<string, AppConfig> = {
     width: 400,
     height: 600,
   },
+  'mood-board': {
+    id: 'mood-board',
+    title: 'Mood Board',
+    icon: <MoodBoardIcon />,
+    component: MoodBoardApp,
+    width: 1000,
+    height: 700,
+  },
+
 
 
 };

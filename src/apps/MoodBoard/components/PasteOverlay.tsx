@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useMoodStore } from '../../../lib/moodStore';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface PasteOverlayProps {
   dayIndex: number;
@@ -11,10 +12,19 @@ export const PasteOverlay: React.FC<PasteOverlayProps> = ({ dayIndex, onClose })
   const { uploadImage, addImage } = useMoodStore();
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [alertState, setAlertState] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file.');
+      setAlertState({
+        isOpen: true,
+        title: 'Invalid File',
+        message: 'Please upload a valid image file (PNG, JPG, WEBP).'
+      });
       return;
     }
 
@@ -25,7 +35,11 @@ export const PasteOverlay: React.FC<PasteOverlayProps> = ({ dayIndex, onClose })
       onClose();
     } catch (error) {
       console.error(error);
-      alert('Failed to upload image. Make sure the "mood-board-assets" bucket exists in Supabase.');
+      setAlertState({
+        isOpen: true,
+        title: 'Upload Failed',
+        message: 'Failed to upload image. Please verify your connection or Supabase configuration.'
+      });
     } finally {
       setIsUploading(false);
     }
@@ -117,6 +131,14 @@ export const PasteOverlay: React.FC<PasteOverlayProps> = ({ dayIndex, onClose })
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+        title={alertState.title}
+        description={alertState.message}
+        variant="alert"
+      />
     </div>
   );
 };

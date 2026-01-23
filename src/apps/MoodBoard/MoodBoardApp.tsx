@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useMoodStore } from '../../lib/moodStore';
 import { WeeklyGrid } from './components/WeeklyGrid';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { startOfWeek, format, addWeeks, subWeeks } from 'date-fns';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
@@ -11,6 +12,12 @@ export const MoodBoardApp = () => {
   const [currentStartDate, setCurrentStartDate] = React.useState(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString()
   );
+
+  const [alertState, setAlertState] = React.useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: ''
+  });
 
   useEffect(() => {
     fetchWeek(currentStartDate);
@@ -56,7 +63,11 @@ export const MoodBoardApp = () => {
               await addImage(gridIndex, publicUrl, path);
             } catch (error) {
               console.error('Paste upload failed:', error);
-              alert('Paste upload failed. Check console.');
+              setAlertState({
+                isOpen: true,
+                title: 'Upload Failed',
+                message: 'Failed to upload pasted image. Please check your connection and try again.'
+              });
             }
           }
           // Continue to next item instead of breaking
@@ -116,6 +127,14 @@ export const MoodBoardApp = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={alertState.isOpen}
+        onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+        title={alertState.title}
+        description={alertState.message}
+        variant="alert"
+      />
     </div>
   );
 };

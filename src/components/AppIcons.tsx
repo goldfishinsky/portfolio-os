@@ -253,3 +253,9 @@ export const MoodBoardIcon = () => (
     </div>
   </IconContainer>
 );
+
+export const PracticeHubIcon = () => (
+  <IconContainer className="bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+    <div className="text-white text-3xl drop-shadow-md">🎯</div>
+  </IconContainer>
+);

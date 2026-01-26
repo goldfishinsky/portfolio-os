@@ -13,6 +13,7 @@ import { FeedReader } from '../apps/FeedReader';
 import { Guitar } from '../apps/Guitar';
 import { MusicPlayer } from '../apps/MusicPlayer';
 import { MoodBoardApp } from '../apps/MoodBoard/MoodBoardApp';
+import PracticeHub from '../apps/PracticeHub/PracticeHub';
 
 
 import videoPlayerIcon from '../assets/icons/video-player.png';
@@ -34,7 +35,8 @@ import {
   FeedIcon,
   GuitarIcon,
   MusicFileIcon,
-  MoodBoardIcon
+  MoodBoardIcon,
+  PracticeHubIcon
 } from '../components/AppIcons';
 
 export const apps: Record<string, AppConfig> = {
@@ -134,6 +136,14 @@ export const apps: Record<string, AppConfig> = {
     component: MoodBoardApp,
     width: 1000,
     height: 700,
+  },
+  'practice-hub': {
+    id: 'practice-hub',
+    title: 'Practice Hub',
+    icon: <PracticeHubIcon />,
+    component: PracticeHub,
+    width: 1200,
+    height: 800,
   },
 
 
